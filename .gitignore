@@ -1,0 +1,10 @@
+build/
+out/
+.gradle/
+.idea/
+*.iml
+classes/
+*.log
+**/WEB-INF/lib/
+war/
+

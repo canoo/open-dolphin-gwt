@@ -1,0 +1,59 @@
+buildscript {
+	// gradle-gwt plugin: https://github.com/steffenschaefer/gwt-gradle-plugin
+	repositories {
+		maven {
+			url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/'
+		}
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.4'
+	}
+}
+
+group = 'org.open-dolphin'
+version = '0.10.1-SNAPSHOT'
+
+apply plugin: 'gwt'
+apply plugin: 'maven'
+
+//def gwtBuildDir = 'war'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+}
+/*
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+*/
+
+jar { 
+    from sourceSets.main.allJava.matching { 
+        include 'com/canoo/opendolphin/**/*.java' 
+        include 'com/canoo/opendolphin/**/*.js' 
+        exclude 'com/canoo/opendolphin/**/*.class' 
+    } 
+} 
+
+gwt {
+	gwtVersion='2.6.0'
+	modules 'com.canoo.opendolphin.OpenDolphin'
+
+//    dev {
+//        port=8080
+//    }
+
+	superDev {
+		noPrecompile=true
+	}
+}
+
