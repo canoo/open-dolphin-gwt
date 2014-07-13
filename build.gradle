@@ -5,17 +5,20 @@ buildscript {
 			url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/'
 		}
 		mavenCentral()
+		jcenter()
 	}
 	dependencies {
 		classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.4'
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3'
 	}
 }
 
 group = 'org.open-dolphin'
-version = '0.10.1-SNAPSHOT'
+version = '0.10.1'
 
 apply plugin: 'gwt'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'bintray'
 
 //def gwtBuildDir = 'war'
 
@@ -25,16 +28,6 @@ repositories {
 
 dependencies {
 }
-/*
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives sourcesJar
-}
-*/
 
 jar { 
     from sourceSets.main.allJava.matching { 
@@ -57,3 +50,27 @@ gwt {
 	}
 }
 
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+}
+
+bintray() {
+
+	user = bintrayUser
+	key = bintrayKey
+	publications = ['mavenJava']
+	pkg {
+		userOrg = 'opendolphin'
+		repo = 'mavenrepo'
+		name = 'open-dolphin-gwt'
+		licenses = ['Apache-2.0']
+	}
+}
+
+task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
+	logger.info "Installing $project.name"
+}
