@@ -14,10 +14,9 @@ public class ClientPresentationModel {
 
 	public ClientPresentationModel(final ClientPresentationModelJS pmJS) {
 		this.pmJS = pmJS;
-		JsArray<ClientAttributeJS> clientAttributesJS = pmJS.getClientAttributes();
-		for (int i = 0; i < clientAttributesJS.length(); i++) {
-			ClientAttributeJS clientAttributeJS = clientAttributesJS.get(i);
-			attributes.add(new ClientAttribute(clientAttributeJS));
+		JsArray<ClientAttribute> clientAttributes = pmJS.getClientAttributes();
+		for (int i = 0; i < clientAttributes.length(); i++) {
+			attributes.add(clientAttributes.get(i));
 		}
 	}
 
@@ -34,13 +33,13 @@ public class ClientPresentationModel {
 	}
 
 	public ClientAttribute getAt(String propertyName) {
-		ClientAttributeJS attributeJS = pmJS.getAt(propertyName);
-		return attributeJS == null ? null : new ClientAttribute(attributeJS); // TODO: is it OK to return a new instance of ClientAttribute? pro: reuse of open-dolphin code, contra: new instance
+		ClientAttribute attribute = pmJS.getAt(propertyName);
+		return attribute;
 	}
 
 	public ClientAttribute getAt(String propertyName, String tag) {
-		ClientAttributeJS attributeJS = pmJS.getAt(propertyName, tag);
-		return new ClientAttribute(attributeJS); // TODO: see comment in getAt(String propertyName)
+		ClientAttribute attribute = pmJS.getAt(propertyName, tag);
+		return attribute;
 	}
 	public ClientAttribute findAttributeByPropertyName(String propertyName) {
 		return getAt(propertyName);
@@ -49,15 +48,15 @@ public class ClientPresentationModel {
 		return getAt(propertyName, tag);
 	}
 	public ClientAttribute findAttributeById(String id) {
-		ClientAttributeJS attributeJS = pmJS.findAttributeById(id);
-		return new ClientAttribute(attributeJS); // TODO: see comment in getAt(String propertyName)
+		ClientAttribute attribute = pmJS.findAttributeById(id);
+		return attribute;
 	}
 	public ClientAttribute findAttributeByQualifier(String qualifier) {
-		ClientAttributeJS attributeJS = pmJS.findAttributeByQualifier(qualifier);
-		return new ClientAttribute(attributeJS); // TODO: see comment in getAt(String propertyName)
+		ClientAttribute attribute = pmJS.findAttributeByQualifier(qualifier);
+		return attribute;
 	}
 	public List<ClientAttribute> findAllAttributesByPropertyName(String propertyName) {
-		JsArray<ClientAttributeJS> jsAttributes = pmJS.findAllAttributesByPropertyName(propertyName);
+		JsArray<ClientAttribute> jsAttributes = pmJS.findAllAttributesByPropertyName(propertyName);
 		return clientAttributesFromJSAttributes(jsAttributes);
 	}
 	public boolean isDirty() {
@@ -80,11 +79,10 @@ public class ClientPresentationModel {
 
 	// === private ===
 
-	private List<ClientAttribute> clientAttributesFromJSAttributes(JsArray<ClientAttributeJS> jsAttributes) {
+	private List<ClientAttribute> clientAttributesFromJSAttributes(JsArray<ClientAttribute> jsAttributes) {
 		final List<ClientAttribute> result = new ArrayList<ClientAttribute>();
 		for (int i = 0; i < jsAttributes.length(); i++) {
-			ClientAttributeJS clientAttributeJS = jsAttributes.get(i);
-			result.add(new ClientAttribute(clientAttributeJS));
+			result.add(jsAttributes.get(i));
 		}
 		return result;
 	}

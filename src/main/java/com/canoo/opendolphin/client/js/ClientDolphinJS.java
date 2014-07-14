@@ -1,5 +1,6 @@
 package com.canoo.opendolphin.client.js;
 
+import com.canoo.opendolphin.client.gwt.ClientAttribute;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 
@@ -29,11 +30,11 @@ public class ClientDolphinJS extends JavaScriptObject
 		});
 	}-*/;
 
-	public final native ClientAttributeJS attribute(String propertyName, String qualifier, String value) /*-{
+	public final native ClientAttribute attribute(String propertyName, String qualifier, String value) /*-{
 		var result = this.attribute(propertyName, qualifier, value);
 		return result;
 	}-*/;
-	public final native ClientAttributeJS attribute(String propertyName, String qualifier, String value, String tag) /*-{
+	public final native ClientAttribute attribute(String propertyName, String qualifier, String value, String tag) /*-{
 		var result = this.attribute(propertyName, qualifier, value, tag);
 		return result;
 	}-*/;
@@ -41,8 +42,8 @@ public class ClientDolphinJS extends JavaScriptObject
 	public final native ClientPresentationModelJS presentationModel(String pmId, String[] attributeNames) /*-{
 		return this.presentationModel(pmId, attributeNames);
 	}-*/;
-	public final native ClientPresentationModelJS presentationModel(String pmId, String type, JsArray<ClientAttributeJS> clientAttributesJS) /*-{
-		return this.presentationModel(pmId, type, clientAttributesJS);
+	public final native ClientPresentationModelJS presentationModel(String pmId, String type, JsArray<ClientAttribute> clientAttributes) /*-{
+		return this.presentationModel(pmId, type, clientAttributes);
 	}-*/;
 
 	public final native ClientModelStoreJS getClientModelStore() /*-{
@@ -77,11 +78,11 @@ public class ClientDolphinJS extends JavaScriptObject
 	public final native void tag(ClientPresentationModelJS pmJS, String propertyName, Object value, String tag) /*-{
 		this.tag(pmJS, propertyName, value, tag);
 	}-*/;
-	public final native ClientAttributeJS attribute(String propertyName, String qualifier, Object value, String tag) /*-{
+	public final native ClientAttribute attribute(String propertyName, String qualifier, Object value, String tag) /*-{
 		return this.attribute(propertyName, qualifier, value, tag);
 	}-*/;
-	public final native void addAttributeToModel(ClientPresentationModelJS pmJS, ClientAttributeJS attributeJS) /*-{
-		this.addAttributeToModel(pmJS, attributeJS);
+	public final native void addAttributeToModel(ClientPresentationModelJS pmJS, ClientAttribute attribute) /*-{
+		this.addAttributeToModel(pmJS, attribute);
 	}-*/;
 	public final native void startPushListening(String pushActionName, String releaseActionName) /*-{
 		this.startPushListening(pushActionName, releaseActionName);

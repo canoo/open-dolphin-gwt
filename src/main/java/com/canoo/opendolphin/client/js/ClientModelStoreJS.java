@@ -1,5 +1,6 @@
 package com.canoo.opendolphin.client.js;
 
+import com.canoo.opendolphin.client.gwt.ClientAttribute;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class ClientModelStoreJS extends JavaScriptObject
@@ -8,7 +9,7 @@ public class ClientModelStoreJS extends JavaScriptObject
 	protected ClientModelStoreJS() {
 	}
 
-	public final native ClientAttributeJS findAttributeById(String attributeId) /*-{
+	public final native ClientAttribute findAttributeById(String attributeId) /*-{
 		var result = this.findAttributeById(attributeId);
 		return (result === undefined) ? null : result;
 	}-*/;

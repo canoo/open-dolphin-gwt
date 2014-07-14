@@ -29,13 +29,13 @@ public class ClientDolphin {
 
 	/** new Attribute with tag 'VALUE' */
     public ClientAttribute attribute(String propertyName, String qualifier, String value) {
-		ClientAttributeJS clientAttributeJS = clientDolphinJS.attribute(propertyName, qualifier, value);
-		return new ClientAttribute(clientAttributeJS);
+		ClientAttribute clientAttribute = clientDolphinJS.attribute(propertyName, qualifier, value);
+		return clientAttribute;
 	}
 
     public ClientAttribute attribute(String propertyName, String qualifier, String value, String tag) {
-		ClientAttributeJS clientAttributeJS = clientDolphinJS.attribute(propertyName, qualifier, value, tag);
-		return new ClientAttribute(clientAttributeJS);
+		ClientAttribute clientAttribute = clientDolphinJS.attribute(propertyName, qualifier, value, tag);
+		return clientAttribute;
 	}
 
     public ClientPresentationModel presentationModel(String id, String... attributeNames) {
@@ -51,9 +51,9 @@ public class ClientDolphin {
 		return this.presentationModelWithType(id, type, clientAttributes.toArray(new ClientAttribute[clientAttributes.size()]));
     }
 	public ClientPresentationModel presentationModelWithType(String id, String type, ClientAttribute... clientAttributes) {
-		JsArray jsAttributes = ClientAttributeJS.createArray().cast();
+		JsArray jsAttributes = ClientAttribute.createArray().cast();
 		for (ClientAttribute clientAttribute : clientAttributes) {
-			jsAttributes.push(clientAttribute.getClientAttributeJS());
+			jsAttributes.push(clientAttribute);
 		}
 
 		ClientPresentationModelJS presentationModelJS = clientDolphinJS.presentationModel(id, type, jsAttributes);
@@ -98,8 +98,8 @@ public class ClientDolphin {
 		clientDolphinJS.tag(pm.pmJS, propertyName, value, tag);
 	}
 	public ClientAttribute attribute(String propertyName, String qualifier, Object value, String tag) {
-		ClientAttributeJS attributeJS = clientDolphinJS.attribute(propertyName, qualifier, value, tag);
-		return new ClientAttribute(attributeJS);
+		ClientAttribute attribute = clientDolphinJS.attribute(propertyName, qualifier, value, tag);
+		return attribute;
 	}
 
 	public ClientAttribute findAttributeById(String id) {
@@ -107,7 +107,7 @@ public class ClientDolphin {
 	}
 
 	public void addAttributeToModel(ClientPresentationModel pm, ClientAttribute attribute) {
-		clientDolphinJS.addAttributeToModel(pm.pmJS, attribute.getClientAttributeJS());
+		clientDolphinJS.addAttributeToModel(pm.pmJS, attribute);
 	}
 
 	public void addModelStoreListener(ModelStoreChangeHandler handler) {

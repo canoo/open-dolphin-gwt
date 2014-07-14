@@ -1,6 +1,7 @@
 package com.canoo.opendolphin.client.js;
 
 import com.canoo.opendolphin.client.gwt.BooleanChangeHandler;
+import com.canoo.opendolphin.client.gwt.ClientAttribute;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 
@@ -8,8 +9,8 @@ public class ClientPresentationModelJS extends JavaScriptObject
 {
 	protected ClientPresentationModelJS(){}
 
-	public static final native ClientPresentationModelJS newPresentationModelJS(ClientDolphinJS clientDolphin, String pmId, String type, JsArray<ClientAttributeJS> clientAttributesJS) /*-{
-		return clientDolphin.presentationModel(pmId, type, clientAttributesJS);
+	public static final native ClientPresentationModelJS newPresentationModelJS(ClientDolphinJS clientDolphin, String pmId, String type, JsArray<ClientAttribute> clientAttributes) /*-{
+		return clientDolphin.presentationModel(pmId, type, clientAttributes);
 	}-*/;
 
 	public final native String getId()/*-{
@@ -20,23 +21,23 @@ public class ClientPresentationModelJS extends JavaScriptObject
 		return this.presentationModelType;
 	}-*/;
 
-	public final native JsArray<ClientAttributeJS> getClientAttributes()/*-{
+	public final native JsArray<ClientAttribute> getClientAttributes()/*-{
 		return this.attributes;
 	}-*/;
-	public final native ClientAttributeJS getAt(String propertyName)/*-{
+	public final native ClientAttribute getAt(String propertyName)/*-{
 		var js = this.getAt(propertyName, undefined);
 		return js === undefined ? null : js;
 	}-*/;
-	public final native ClientAttributeJS getAt(String propertyName, String tag)/*-{
+	public final native ClientAttribute getAt(String propertyName, String tag)/*-{
 		return this.getAt(propertyName, tag);
 	}-*/;
-	public final native ClientAttributeJS findAttributeById(String id)/*-{
+	public final native ClientAttribute findAttributeById(String id)/*-{
 		return this.findAttributeById(id);
 	}-*/;
-	public final native ClientAttributeJS findAttributeByQualifier(String qualifier)/*-{
+	public final native ClientAttribute findAttributeByQualifier(String qualifier)/*-{
 		return this.findAttributeByQualifier(qualifier);
 	}-*/;
-	public final native JsArray<ClientAttributeJS> findAllAttributesByPropertyName(String propertyName)/*-{
+	public final native JsArray<ClientAttribute> findAllAttributesByPropertyName(String propertyName)/*-{
 		return this.findAllAttributesByPropertyName(propertyName);
 	}-*/;
 	public final native boolean isDirty()/*-{
