@@ -1,6 +1,5 @@
 package com.canoo.opendolphin.client.gwt;
 
-import com.canoo.opendolphin.client.js.ClientAttributeJS;
 import com.canoo.opendolphin.client.js.ClientPresentationModelJS;
 import com.google.gwt.core.client.JsArray;
 
