@@ -14,7 +14,7 @@ buildscript {
 }
 
 group = 'org.open-dolphin'
-version = '0.10.2-SNAPSHOT'
+version = '0.10.2'
 
 apply plugin: 'gwt'
 apply plugin: 'maven-publish'
@@ -36,7 +36,11 @@ jar {
         include 'com/canoo/opendolphin/**/*.js' 
         exclude 'com/canoo/opendolphin/**/*.class' 
     } 
-} 
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	from sourceSets.main.allSource
+}
 
 gwt {
 	gwtVersion='2.6.0'
@@ -55,6 +59,9 @@ publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
+			artifact sourcesJar {
+				classifier "sources"
+			}
 		}
 	}
 }
