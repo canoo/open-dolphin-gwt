@@ -20,11 +20,19 @@ public class ClientDolphin {
 	}
 
     public void send(String commandName, final OnFinishedHandler handler) {
-		clientDolphinJS.send(commandName, new OnFinishedHandlerAdapter(handler));
+		clientDolphinJS.send(commandName, new JSArrayHandler<ClientPresentationModel>() {
+			public void handleElements(JsArray<ClientPresentationModel> elements) {
+				handler.handlePresentationModels(JsArrays.jsArrayToList(elements));
+			}
+		});
     }
 
     public void sendEmpty(final OnFinishedHandler handler) {
-		clientDolphinJS.sendEmpty(new OnFinishedHandlerAdapter(handler));
+		clientDolphinJS.sendEmpty(new JSArrayHandler<ClientPresentationModel>() {
+			public void handleElements(JsArray<ClientPresentationModel> elements) {
+				handler.handlePresentationModels(JsArrays.jsArrayToList(elements));
+			}
+		});
     }
 
 	/** new Attribute with tag 'VALUE' */
@@ -56,8 +64,7 @@ public class ClientDolphin {
 			jsAttributes.push(clientAttribute);
 		}
 
-		ClientPresentationModelJS presentationModelJS = clientDolphinJS.presentationModel(id, type, jsAttributes);
-		return new ClientPresentationModel(presentationModelJS);
+		return clientDolphinJS.presentationModel(id, type, jsAttributes);
 	}
 
     public ClientModelStore getClientModelStore() {
@@ -71,31 +78,27 @@ public class ClientDolphin {
 	}
 
 	public List<ClientPresentationModel> listPresentationModels() {
-		ClientPresentationModelJS[] pms = clientDolphinJS.listPresentationModels();
-		return pmJSArrayAsPMList(pms);
+		return Arrays.asList(clientDolphinJS.listPresentationModels());
 	}
 	public List<ClientPresentationModel> findAllPresentationModelsByType(String pmType) {
-		ClientPresentationModelJS[] pms = clientDolphinJS.findAllPresentationModelsByType(pmType);
-		return pmJSArrayAsPMList(pms);
+		return Arrays.asList(clientDolphinJS.findAllPresentationModelsByType(pmType));
 	}
 
 	public ClientPresentationModel getAt(String pmId) {
-		ClientPresentationModelJS pmJS = clientDolphinJS.getAt(pmId);
-		return pmJS == null ? null : new ClientPresentationModel(pmJS);
+		return clientDolphinJS.getAt(pmId);
 	}
 	public ClientPresentationModel findPresentationModelById(String pmId) {
-		ClientPresentationModelJS pm = clientDolphinJS.findPresentationModelById(pmId);
-		return pm == null ? null : new ClientPresentationModel(pm);
+		return clientDolphinJS.findPresentationModelById(pmId);
 	}
 
 	public void deletePresentationModel(ClientPresentationModel pm) {
-		clientDolphinJS.deletePresentationModel(pm.pmJS);
+		clientDolphinJS.deletePresentationModel(pm);
 	}
 	public void deleteAllPresentationModelsOfType(String pmType) {
 		clientDolphinJS.deleteAllPresentationModelsOfType(pmType);
 	}
 	public void tag(ClientPresentationModel pm, String propertyName, Object value, String tag) {
-		clientDolphinJS.tag(pm.pmJS, propertyName, value, tag);
+		clientDolphinJS.tag(pm, propertyName, value, tag);
 	}
 	public ClientAttribute attribute(String propertyName, String qualifier, Object value, String tag) {
 		ClientAttribute attribute = clientDolphinJS.attribute(propertyName, qualifier, value, tag);
@@ -107,7 +110,7 @@ public class ClientDolphin {
 	}
 
 	public void addAttributeToModel(ClientPresentationModel pm, ClientAttribute attribute) {
-		clientDolphinJS.addAttributeToModel(pm.pmJS, attribute);
+		clientDolphinJS.addAttributeToModel(pm, attribute);
 	}
 
 	public void addModelStoreListener(ModelStoreChangeHandler handler) {
@@ -121,31 +124,4 @@ public class ClientDolphin {
 		clientDolphinJS.stopPushListening();
 	}
 
-	// --- private routines ---
-
-	private List<ClientPresentationModel> pmJSArrayAsPMList(ClientPresentationModelJS[] pms) {
-		List<ClientPresentationModel> result = new ArrayList<ClientPresentationModel>(pms.length);
-		for (ClientPresentationModelJS pm : pms) {
-			result.add(new ClientPresentationModel(pm));
-		}
-		return result;
-	}
-
-	private static class OnFinishedHandlerAdapter implements OnFinishedHandlerJS {
-		private final OnFinishedHandler handler;
-
-		public OnFinishedHandlerAdapter(OnFinishedHandler handler) {
-			this.handler = handler;
-		}
-
-		@Override
-		public void handlePresentationModels(final JsArray<ClientPresentationModelJS> jsPMs) {
-			List<ClientPresentationModel> pms = new ArrayList<ClientPresentationModel>(jsPMs.length());
-			for (int i = 0; i < jsPMs.length(); i++) {
-				pms.add(new ClientPresentationModel(jsPMs.get(i)));
-			}
-
-			handler.handlePresentationModels(pms);
-		}
-	}
 }

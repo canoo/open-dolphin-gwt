@@ -9,10 +9,6 @@ public class ClientPresentationModelJS extends JavaScriptObject
 {
 	protected ClientPresentationModelJS(){}
 
-	public static final native ClientPresentationModelJS newPresentationModelJS(ClientDolphinJS clientDolphin, String pmId, String type, JsArray<ClientAttribute> clientAttributes) /*-{
-		return clientDolphin.presentationModel(pmId, type, clientAttributes);
-	}-*/;
-
 	public final native String getId()/*-{
 		return this.id;
 	}-*/;

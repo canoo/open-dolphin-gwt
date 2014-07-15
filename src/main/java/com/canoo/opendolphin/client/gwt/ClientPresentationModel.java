@@ -1,89 +1,76 @@
 package com.canoo.opendolphin.client.gwt;
 
-import com.canoo.opendolphin.client.js.ClientPresentationModelJS;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ClientPresentationModel {
-	final ClientPresentationModelJS pmJS;
+public class ClientPresentationModel extends JavaScriptObject {
 
-	private final List<ClientAttribute> attributes = new ArrayList<ClientAttribute>();
+	protected ClientPresentationModel() {}
 
-	public ClientPresentationModel(final ClientPresentationModelJS pmJS) {
-		this.pmJS = pmJS;
-		JsArray<ClientAttribute> clientAttributes = pmJS.getClientAttributes();
-		for (int i = 0; i < clientAttributes.length(); i++) {
-			attributes.add(clientAttributes.get(i));
-		}
+	public final native String getId()/*-{
+		return this.id;
+	}-*/;
+
+	public final native String getPresentationModelType()/*-{
+		return this.presentationModelType;
+	}-*/;
+
+	private final native JsArray<ClientAttribute> internal_getAttributes()/*-{
+		return this.attributes;
+	}-*/;
+	public final List<ClientAttribute> getAttributes() {
+		return JsArrays.jsArrayToList(internal_getAttributes());
 	}
 
-	public String getId() {
-		return pmJS.getId();
-	}
+	public final native ClientAttribute getAt(String propertyName)/*-{
+		var js = this.getAt(propertyName, undefined);
+		return js === undefined ? null : js;
+	}-*/;
 
-	public String getPresentationModelType() {
-		return pmJS.getPresentationModelType();
-	}
+	public final native ClientAttribute getAt(String propertyName, String tag)/*-{
+		return this.getAt(propertyName, tag);
+	}-*/;
 
-	public List<ClientAttribute> getAttributes() {
-		return attributes;
-	}
-
-	public ClientAttribute getAt(String propertyName) {
-		ClientAttribute attribute = pmJS.getAt(propertyName);
-		return attribute;
-	}
-
-	public ClientAttribute getAt(String propertyName, String tag) {
-		ClientAttribute attribute = pmJS.getAt(propertyName, tag);
-		return attribute;
-	}
-	public ClientAttribute findAttributeByPropertyName(String propertyName) {
+	public final ClientAttribute findAttributeByPropertyName(String propertyName) {
 		return getAt(propertyName);
 	}
-	public ClientAttribute findAttributeByPropertyNameAndTag(String propertyName, String tag) {
+	public final ClientAttribute findAttributeByPropertyNameAndTag(String propertyName, String tag) {
 		return getAt(propertyName, tag);
 	}
-	public ClientAttribute findAttributeById(String id) {
-		ClientAttribute attribute = pmJS.findAttributeById(id);
-		return attribute;
+	public final native ClientAttribute findAttributeById(String id)/*-{
+		return this.findAttributeById(id);
+	}-*/;
+	public final native ClientAttribute findAttributeByQualifier(String qualifier)/*-{
+		return this.findAttributeByQualifier(qualifier);
+	}-*/;
+	private native JsArray<ClientAttribute> internal_findAllAttributesByPropertyName(String propertyName)/*-{
+		return this.findAllAttributesByPropertyName(propertyName);
+	}-*/;
+	public final List<ClientAttribute> findAllAttributesByPropertyName(String propertyName) {
+		return JsArrays.jsArrayToList(internal_findAllAttributesByPropertyName(propertyName));
 	}
-	public ClientAttribute findAttributeByQualifier(String qualifier) {
-		ClientAttribute attribute = pmJS.findAttributeByQualifier(qualifier);
-		return attribute;
-	}
-	public List<ClientAttribute> findAllAttributesByPropertyName(String propertyName) {
-		JsArray<ClientAttribute> jsAttributes = pmJS.findAllAttributesByPropertyName(propertyName);
-		return clientAttributesFromJSAttributes(jsAttributes);
-	}
-	public boolean isDirty() {
-		return pmJS.isDirty();
-	}
-	public void rebase() {
-		pmJS.rebase();
-	}
+	public final native boolean isDirty()/*-{
+		return this.isDirty();
+	}-*/;
+	public final native boolean rebase()/*-{
+		return this.rebase();
+	}-*/;
 
-	public void syncWith(ClientPresentationModel pm) {
-		pmJS.syncWith(pm.pmJS);
-	}
+	public final native void syncWith(ClientPresentationModel pm) /*-{
+		this.syncWith(pm);
+	}-*/;
 
-	public void addDirtyChangeHandler(BooleanChangeHandler booleanChangeHandler) {
-		pmJS.addDirtyChangeHandler(booleanChangeHandler);
-	}
-	public void addInvalidationHandler(PresentationModelInvalidationHandler handler) {
-		pmJS.addInvalidationHandler(new PresentationModelInvalidationHandlerAdapter(handler));
-	}
-
-	// === private ===
-
-	private List<ClientAttribute> clientAttributesFromJSAttributes(JsArray<ClientAttribute> jsAttributes) {
-		final List<ClientAttribute> result = new ArrayList<ClientAttribute>();
-		for (int i = 0; i < jsAttributes.length(); i++) {
-			result.add(jsAttributes.get(i));
-		}
-		return result;
-	}
+	public final native void addDirtyChangeHandler(BooleanChangeHandler handler) /*-{
+		this.onDirty(function (data) {
+			handler.@com.canoo.opendolphin.client.gwt.BooleanChangeHandler::handleChange(ZZ)(data.oldValue, data.newValue);
+		});
+	}-*/;
+	public final native void addInvalidationHandler(PresentationModelInvalidationHandler handler) /*-{
+		this.onInvalidated(function (data) {
+			handler.@com.canoo.opendolphin.client.gwt.PresentationModelInvalidationHandler::handleChange(Lcom/canoo/opendolphin/client/gwt/ClientPresentationModel;)(data.source);
+		});
+	}-*/;
 
 }

@@ -1,6 +1,5 @@
 package com.canoo.opendolphin.client.gwt;
 
-import com.canoo.opendolphin.client.js.ClientPresentationModelJS;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class ClientAttribute extends JavaScriptObject {
@@ -47,18 +46,17 @@ public class ClientAttribute extends JavaScriptObject {
 		return this.reset();
 	}-*/;
 	public final ClientPresentationModel getPresentationModel() {
-		ClientPresentationModelJS pmJS = _getPresentationModel();
-		return pmJS == null ? null : new ClientPresentationModel(pmJS);
+		return internal_getPresentationModel();
 	}
-	public final native ClientPresentationModelJS _getPresentationModel()/*-{
+	public final native ClientPresentationModel internal_getPresentationModel()/*-{
 		var pm = this.getPresentationModel();
 		return pm === undefined ? null : pm;
 	}-*/;
 	public final void setPresentationModel(ClientPresentationModel pm) {
-		_setPresentationModel(pm.pmJS);
+		_setPresentationModel(pm);
 	}
-	public final native void _setPresentationModel(ClientPresentationModelJS pmJS) /*-{
-		this.setPresentationModel(pmJS);
+	public final native void _setPresentationModel(ClientPresentationModel pm) /*-{
+		this.setPresentationModel(pm);
 	}-*/;
 	public final native void setQualifier(String qualifier) /*-{
 		this.setQualifier(qualifier);
