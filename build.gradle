@@ -27,6 +27,7 @@ repositories {
 }
 
 dependencies {
+	compile ('com.google.gwt:gwt-servlet:2.6.0') {force = true} // explicit dependency just for IntelliJ since the IDE does not pick up the dependency from the gwt plugin
 }
 
 jar { 

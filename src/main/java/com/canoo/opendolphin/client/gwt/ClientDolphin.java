@@ -1,151 +1,150 @@
 package com.canoo.opendolphin.client.gwt;
 
 import com.canoo.opendolphin.client.js.*;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ClientDolphin {
+public class ClientDolphin extends JavaScriptObject {
 
-    private final ClientDolphinJS clientDolphinJS;
+	protected ClientDolphin() {}
 
-    public ClientDolphin(ClientDolphinJS clientDolphinJS) {
-		this.clientDolphinJS = clientDolphinJS;
+	public final native void send(String commandName) /*-{
+		this.send(commandName);
+	}-*/;
+
+	private final native void internal_send(String commandName, JSArrayHandler<ClientPresentationModel> handler) /*-{
+		this.send(commandName, {onFinished: function (pms)  {
+			handler.@com.canoo.opendolphin.client.js.JSArrayHandler::handleElements(Lcom/google/gwt/core/client/JsArray;)(pms)
+		}
+		});
+	}-*/;
+    public final void send(String commandName, final OnFinishedHandler handler) {
+		internal_send(commandName, new JSArrayHandler<ClientPresentationModel>() {
+			public void handleElements(JsArray<ClientPresentationModel> elements) {
+				handler.handlePresentationModels(JsArrays.jsArrayToList(elements));
+			}
+		});
     }
 
-    public void send(String commandName) {
-		clientDolphinJS.send(commandName);
-	}
-
-    public void send(String commandName, final OnFinishedHandler handler) {
-		clientDolphinJS.send(commandName, new OnFinishedHandlerAdapter(handler));
-    }
-
-    public void sendEmpty(final OnFinishedHandler handler) {
-		clientDolphinJS.sendEmpty(new OnFinishedHandlerAdapter(handler));
+	private final native void internal_sendEmpty(JSArrayHandler<ClientPresentationModel> handler) /*-{
+		this.sendEmpty({onFinished: function (pms)  {
+			handler.@com.canoo.opendolphin.client.js.JSArrayHandler::handleElements(Lcom/google/gwt/core/client/JsArray;)(pms)
+		}
+		});
+	}-*/;
+    public final void sendEmpty(final OnFinishedHandler handler) {
+		internal_sendEmpty(new JSArrayHandler<ClientPresentationModel>() {
+			public void handleElements(JsArray<ClientPresentationModel> elements) {
+				handler.handlePresentationModels(JsArrays.jsArrayToList(elements));
+			}
+		});
     }
 
 	/** new Attribute with tag 'VALUE' */
-    public ClientAttribute attribute(String propertyName, String qualifier, String value) {
-		ClientAttributeJS clientAttributeJS = clientDolphinJS.attribute(propertyName, qualifier, value);
-		return new ClientAttribute(clientAttributeJS);
-	}
+	public final native ClientAttribute attribute(String propertyName, String qualifier, String value) /*-{
+		return this.attribute(propertyName, qualifier, value);
+	}-*/;
+	public final native ClientAttribute attribute(String propertyName, String qualifier, String value, String tag) /*-{
+		return this.attribute(propertyName, qualifier, value, tag);
+	}-*/;
 
-    public ClientAttribute attribute(String propertyName, String qualifier, String value, String tag) {
-		ClientAttributeJS clientAttributeJS = clientDolphinJS.attribute(propertyName, qualifier, value, tag);
-		return new ClientAttribute(clientAttributeJS);
-	}
-
-    public ClientPresentationModel presentationModel(String id, String... attributeNames) {
+	private native ClientPresentationModel internal_presentationModel(String pmId, String[] attributeNames) /*-{
+		return this.presentationModel(pmId, attributeNames);
+	}-*/;
+    public final ClientPresentationModel presentationModel(String id, String... attributeNames) {
 		return this.presentationModelWithType(id, null, attributeNames);
 	}
-    public ClientPresentationModel presentationModelWithType(String id, String type, String... clientAttributePropertyNames) {
+    public final ClientPresentationModel presentationModelWithType(String id, String type, String... clientAttributePropertyNames) {
 
 		List<ClientAttribute> clientAttributes = new ArrayList<ClientAttribute>();
 		for (String propertyName : clientAttributePropertyNames) {
-			ClientAttribute clientAttribute = this.attribute(propertyName, null, null);
-			clientAttributes.add(clientAttribute);
+			clientAttributes.add(this.attribute(propertyName, null, null));
 		}
 		return this.presentationModelWithType(id, type, clientAttributes.toArray(new ClientAttribute[clientAttributes.size()]));
     }
-	public ClientPresentationModel presentationModelWithType(String id, String type, ClientAttribute... clientAttributes) {
-		JsArray jsAttributes = ClientAttributeJS.createArray().cast();
+	private native ClientPresentationModel presentationModel(String pmId, String type, JsArray<ClientAttribute> clientAttributes) /*-{
+		return this.presentationModel(pmId, type, clientAttributes);
+	}-*/;
+	public final ClientPresentationModel presentationModelWithType(String id, String type, ClientAttribute... clientAttributes) {
+		JsArray jsAttributes = ClientAttribute.createArray().cast();
 		for (ClientAttribute clientAttribute : clientAttributes) {
-			jsAttributes.push(clientAttribute.getClientAttributeJS());
+			jsAttributes.push(clientAttribute);
 		}
 
-		ClientPresentationModelJS presentationModelJS = clientDolphinJS.presentationModel(id, type, jsAttributes);
-		return new ClientPresentationModel(presentationModelJS);
+		return presentationModel(id, type, jsAttributes);
 	}
 
-    public ClientModelStore getClientModelStore() {
-        return new ClientModelStore(clientDolphinJS.getClientModelStore());
-    }
+	public final native ClientModelStore getClientModelStore() /*-{
+		return this.getClientModelStore();
+	}-*/;
 
 
-	public List<String> listPresentationModelIds() {
-		String[] pmIds = clientDolphinJS.listPresentationModelIds();
-		return Arrays.asList(pmIds);
+	private native String[] internal_listPresentationModelIds() /*-{
+		return this.listPresentationModelIds();
+	}-*/;
+	public final List<String> listPresentationModelIds() {
+		return Arrays.asList(internal_listPresentationModelIds());
 	}
 
-	public List<ClientPresentationModel> listPresentationModels() {
-		ClientPresentationModelJS[] pms = clientDolphinJS.listPresentationModels();
-		return pmJSArrayAsPMList(pms);
-	}
-	public List<ClientPresentationModel> findAllPresentationModelsByType(String pmType) {
-		ClientPresentationModelJS[] pms = clientDolphinJS.findAllPresentationModelsByType(pmType);
-		return pmJSArrayAsPMList(pms);
+	private native ClientPresentationModel[] internal_listPresentationModels() /*-{
+		return this.listPresentationModels();
+	}-*/;
+	public final List<ClientPresentationModel> listPresentationModels() {
+		return Arrays.asList(internal_listPresentationModels());
 	}
 
-	public ClientPresentationModel getAt(String pmId) {
-		ClientPresentationModelJS pmJS = clientDolphinJS.getAt(pmId);
-		return pmJS == null ? null : new ClientPresentationModel(pmJS);
-	}
-	public ClientPresentationModel findPresentationModelById(String pmId) {
-		ClientPresentationModelJS pm = clientDolphinJS.findPresentationModelById(pmId);
-		return pm == null ? null : new ClientPresentationModel(pm);
+	private native ClientPresentationModel[] internal_findAllPresentationModelsByType(String pmType) /*-{
+		return this.findAllPresentationModelByType(pmType);
+	}-*/;
+	public final List<ClientPresentationModel> findAllPresentationModelsByType(String pmType) {
+		return Arrays.asList(internal_findAllPresentationModelsByType(pmType));
 	}
 
-	public void deletePresentationModel(ClientPresentationModel pm) {
-		clientDolphinJS.deletePresentationModel(pm.pmJS);
-	}
-	public void deleteAllPresentationModelsOfType(String pmType) {
-		clientDolphinJS.deleteAllPresentationModelsOfType(pmType);
-	}
-	public void tag(ClientPresentationModel pm, String propertyName, Object value, String tag) {
-		clientDolphinJS.tag(pm.pmJS, propertyName, value, tag);
-	}
-	public ClientAttribute attribute(String propertyName, String qualifier, Object value, String tag) {
-		ClientAttributeJS attributeJS = clientDolphinJS.attribute(propertyName, qualifier, value, tag);
-		return new ClientAttribute(attributeJS);
-	}
+	public final native ClientPresentationModel getAt(String pmId) /*-{
+		var pm = this.getAt(pmId);
+		return (pm === undefined) ? null : pm;
+	}-*/;
 
-	public ClientAttribute findAttributeById(String id) {
+	public final native ClientPresentationModel findPresentationModelById(String pmId) /*-{
+		var pm = this.findPresentationModelById(pmId);
+		return (pm === undefined) ? null : pm;
+	}-*/;
+
+	public final native void deletePresentationModel(ClientPresentationModel pm) /*-{
+		this.deletePresentationModel(pm);
+	}-*/;
+	public final native void deleteAllPresentationModelsOfType(String pmType) /*-{
+		this.deleteAllPresentationModelOfType(pmType);
+	}-*/;
+	public final native void tag(ClientPresentationModel pm, String propertyName, Object value, String tag) /*-{
+		this.tag(pm, propertyName, value, tag);
+	}-*/;
+	public final native ClientAttribute attribute(String propertyName, String qualifier, Object value, String tag) /*-{
+		return this.attribute(propertyName, qualifier, value, tag);
+	}-*/;
+
+	public final ClientAttribute findAttributeById(String id) {
 		return getClientModelStore().findAttributeById(id);
 	}
 
-	public void addAttributeToModel(ClientPresentationModel pm, ClientAttribute attribute) {
-		clientDolphinJS.addAttributeToModel(pm.pmJS, attribute.getClientAttributeJS());
-	}
+	public final native void addAttributeToModel(ClientPresentationModel pm, ClientAttribute attribute) /*-{
+		this.addAttributeToModel(pm, attribute);
+	}-*/;
 
-	public void addModelStoreListener(ModelStoreChangeHandler handler) {
+	public final void addModelStoreListener(ModelStoreChangeHandler handler) {
 		getClientModelStore().addModelStoreListener(handler);
 	}
 
-	public void startPushListening(String pushActionName, String releaseActionName) {
-		clientDolphinJS.startPushListening(pushActionName, releaseActionName);
-	}
-	public void stopPushListening() {
-		clientDolphinJS.stopPushListening();
-	}
+	public final native void startPushListening(String pushActionName, String releaseActionName) /*-{
+		this.startPushListening(pushActionName, releaseActionName);
+	}-*/;
 
-	// --- private routines ---
+	public final native void stopPushListening() /*-{
+		this.stopPushListening();
+	}-*/;
 
-	private List<ClientPresentationModel> pmJSArrayAsPMList(ClientPresentationModelJS[] pms) {
-		List<ClientPresentationModel> result = new ArrayList<ClientPresentationModel>(pms.length);
-		for (ClientPresentationModelJS pm : pms) {
-			result.add(new ClientPresentationModel(pm));
-		}
-		return result;
-	}
-
-	private static class OnFinishedHandlerAdapter implements OnFinishedHandlerJS {
-		private final OnFinishedHandler handler;
-
-		public OnFinishedHandlerAdapter(OnFinishedHandler handler) {
-			this.handler = handler;
-		}
-
-		@Override
-		public void handlePresentationModels(final JsArray<ClientPresentationModelJS> jsPMs) {
-			List<ClientPresentationModel> pms = new ArrayList<ClientPresentationModel>(jsPMs.length());
-			for (int i = 0; i < jsPMs.length(); i++) {
-				pms.add(new ClientPresentationModel(jsPMs.get(i)));
-			}
-
-			handler.handlePresentationModels(pms);
-		}
-	}
 }
