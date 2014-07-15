@@ -1,6 +1,7 @@
 package com.canoo.opendolphin.client.js;
 
 import com.canoo.opendolphin.client.gwt.ClientAttribute;
+import com.canoo.opendolphin.client.gwt.ClientModelStore;
 import com.canoo.opendolphin.client.gwt.ClientPresentationModel;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -46,10 +47,10 @@ public class ClientDolphinJS extends JavaScriptObject
 		return this.presentationModel(pmId, type, clientAttributes);
 	}-*/;
 
-	public final native ClientModelStoreJS getClientModelStore() /*-{
+	public final native ClientModelStore getClientModelStore() /*-{
 		return this.getClientModelStore();
 	}-*/;
-	public final native void setClientModelStore(ClientModelStoreJS clientModelStoreJS) /*-{
+	public final native void setClientModelStore(ClientModelStore clientModelStoreJS) /*-{
 		return this.setClientModelStore(clientModelStoreJS);
 	}-*/;
 	public final native String[] listPresentationModelIds() /*-{

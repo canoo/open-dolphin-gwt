@@ -68,7 +68,7 @@ public class ClientDolphin {
 	}
 
     public ClientModelStore getClientModelStore() {
-        return new ClientModelStore(clientDolphinJS.getClientModelStore());
+        return clientDolphinJS.getClientModelStore();
     }
 
 
