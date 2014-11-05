@@ -5,7 +5,11 @@ import com.canoo.opendolphin.client.gwt.DolphinStarter;
 
 public class DolphinLoaderJS {
 
-	public final static native void load(String dolphinURL, DolphinStarter dolphinStarter) /*-{
+	public static void load(String dolphinURL, DolphinStarter dolphinStarter) {
+		load(dolphinURL, true, 0, dolphinStarter);
+	}
+
+	public final static native void load(String dolphinURL, boolean reset, int slackInMillis, DolphinStarter dolphinStarter) /*-{
 		$wnd.require.config({
 			baseUrl: 'com.canoo.opendolphin.OpenDolphin'
 		});
@@ -13,7 +17,7 @@ public class DolphinLoaderJS {
 		$wnd.require([
 			'dolphin/OpenDolphin'
 		], function (OpenDolphin_js) {
-			@com.canoo.opendolphin.client.gwt.DolphinBaseStarter::start(Lcom/canoo/opendolphin/client/js/OpenDolphinJS;Ljava/lang/String;Lcom/canoo/opendolphin/client/gwt/DolphinStarter;)(OpenDolphin_js, dolphinURL, dolphinStarter);
+			@com.canoo.opendolphin.client.gwt.DolphinBaseStarter::start(Lcom/canoo/opendolphin/client/js/OpenDolphinJS;Ljava/lang/String;ZILcom/canoo/opendolphin/client/gwt/DolphinStarter;)(OpenDolphin_js, dolphinURL, reset, slackInMillis, dolphinStarter);
 		});
 
 	}-*/;
