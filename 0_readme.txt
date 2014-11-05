@@ -1,3 +1,9 @@
 install into local maven repository: ./gradlew install
 
-upload to bintray:
+make release:
+* remove SNAPSHOT from version in +build.gradle+. E.g.: +0.10.4-SNAPSHOT+ -> +0.10.4+
+* ./gradlew bintrayUpload
+* tag git repo: git tag -a "0.10.4" -m "version 0.10.4"
+* git push
+* git push --tags
+* increase version in +build.gradle+ and add SNAPSHOT . E.g.: +0.10.4+ -> +0.10.5-SNAPSHOT+
