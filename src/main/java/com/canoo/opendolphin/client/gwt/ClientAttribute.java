@@ -61,14 +61,14 @@ public class ClientAttribute extends JavaScriptObject {
 	public final native void setQualifier(String qualifier) /*-{
 		this.setQualifier(qualifier);
 	}-*/;
-	public final native void addValueChangeHandler(AttributeChangeHandler handler) /*-{
+	public final native void addValueChangeHandler(ChangeHandler<String> handler) /*-{
 		this.onValueChange(function (data) {
-			handler.@com.canoo.opendolphin.client.gwt.AttributeChangeHandler::handleChange(Ljava/lang/String;Ljava/lang/String;)(data.oldValue, data.newValue);
+			handler.@com.canoo.opendolphin.client.gwt.ChangeHandler::handleChange(Ljava/lang/Object;Ljava/lang/Object;)(data.oldValue, data.newValue);
 		});
 	}-*/;
-	public final native void addQualifierChangeHandler(AttributeChangeHandler handler) /*-{
+	public final native void addQualifierChangeHandler(ChangeHandler<String> handler) /*-{
 		this.onQualifierChange(function (data) {
-			handler.@com.canoo.opendolphin.client.gwt.AttributeChangeHandler::handleChange(Ljava/lang/String;Ljava/lang/String;)(data.oldValue, data.newValue);
+			handler.@com.canoo.opendolphin.client.gwt.ChangeHandler::handleChange(Ljava/lang/Object;Ljava/lang/Object;)(data.oldValue, data.newValue);
 		});
 	}-*/;
 	public final native void addDirtyChangeHandler(BooleanChangeHandler handler) /*-{
