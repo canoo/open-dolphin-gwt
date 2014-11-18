@@ -97,11 +97,12 @@ public class ClientDolphin extends JavaScriptObject {
 		return Arrays.asList(internal_listPresentationModels());
 	}
 
-	private native ClientPresentationModel[] internal_findAllPresentationModelsByType(String pmType) /*-{
+	private native JsArray<ClientPresentationModel> internal_findAllPresentationModelsByType(String pmType) /*-{
 		return this.findAllPresentationModelByType(pmType);
 	}-*/;
 	public final List<ClientPresentationModel> findAllPresentationModelsByType(String pmType) {
-		return Arrays.asList(internal_findAllPresentationModelsByType(pmType));
+		JsArray<ClientPresentationModel> pms = internal_findAllPresentationModelsByType(pmType);
+		return jsArrayAsList(pms);
 	}
 
 	public final native ClientPresentationModel getAt(String pmId) /*-{
@@ -147,4 +148,11 @@ public class ClientDolphin extends JavaScriptObject {
 		this.stopPushListening();
 	}-*/;
 
+	private List<ClientPresentationModel> jsArrayAsList(JsArray<ClientPresentationModel> pms) {
+		List<ClientPresentationModel> result = new ArrayList<ClientPresentationModel>(pms.length());
+		for (int i = 0; i < pms.length(); i++) {
+			result.add(pms.get(i));
+		}
+		return result;
+	}
 }
