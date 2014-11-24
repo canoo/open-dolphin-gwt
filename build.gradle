@@ -14,7 +14,7 @@ buildscript {
 }
 
 group = 'org.open-dolphin'
-version = '0.10.5-SNAPSHOT'
+version = '0.10.5'
 
 apply plugin: 'gwt'
 apply plugin: 'maven-publish'
