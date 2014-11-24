@@ -3,9 +3,9 @@ package com.canoo.opendolphin.client.gwt;
 import com.canoo.opendolphin.client.js.*;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayString;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ClientDolphin extends JavaScriptObject {
@@ -83,25 +83,26 @@ public class ClientDolphin extends JavaScriptObject {
 	}-*/;
 
 
-	private native String[] internal_listPresentationModelIds() /*-{
+	private native JsArrayString internal_listPresentationModelIds() /*-{
 		return this.listPresentationModelIds();
 	}-*/;
 	public final List<String> listPresentationModelIds() {
-		return Arrays.asList(internal_listPresentationModelIds());
+		return jsArrayStringAsList(internal_listPresentationModelIds());
 	}
 
-	private native ClientPresentationModel[] internal_listPresentationModels() /*-{
+	private native JsArray<ClientPresentationModel> internal_listPresentationModels() /*-{
 		return this.listPresentationModels();
 	}-*/;
 	public final List<ClientPresentationModel> listPresentationModels() {
-		return Arrays.asList(internal_listPresentationModels());
+		return jsArrayPmsAsList(internal_listPresentationModels());
 	}
 
-	private native ClientPresentationModel[] internal_findAllPresentationModelsByType(String pmType) /*-{
+	private native JsArray<ClientPresentationModel> internal_findAllPresentationModelsByType(String pmType) /*-{
 		return this.findAllPresentationModelByType(pmType);
 	}-*/;
 	public final List<ClientPresentationModel> findAllPresentationModelsByType(String pmType) {
-		return Arrays.asList(internal_findAllPresentationModelsByType(pmType));
+		JsArray<ClientPresentationModel> pms = internal_findAllPresentationModelsByType(pmType);
+		return jsArrayPmsAsList(pms);
 	}
 
 	public final native ClientPresentationModel getAt(String pmId) /*-{
@@ -147,4 +148,18 @@ public class ClientDolphin extends JavaScriptObject {
 		this.stopPushListening();
 	}-*/;
 
+	private List<ClientPresentationModel> jsArrayPmsAsList(JsArray<ClientPresentationModel> pms) {
+		List<ClientPresentationModel> result = new ArrayList<ClientPresentationModel>(pms.length());
+		for (int i = 0; i < pms.length(); i++) {
+			result.add(pms.get(i));
+		}
+		return result;
+	}
+	private List<String> jsArrayStringAsList(JsArrayString jsStrings) {
+		List<String> result = new ArrayList<String>(jsStrings.length());
+		for (int i = 0; i < jsStrings.length(); i++) {
+			result.add(jsStrings.get(i));
+		}
+		return result;
+	}
 }
