@@ -1113,18 +1113,7 @@ var opendolphin;
             var model = new opendolphin.ClientPresentationModel(id, type);
             if (attributes && attributes.length > 0) {
                 attributes.forEach(function (attribute) {
-                    //ORG: model.addAttribute(attribute);
-
-                    //OD-GWT: start change:
-                    if (attribute.constructor.name == 'Array') {
-                        attribute.forEach(function(elem) {
-                            model.addAttribute(elem);
-                        })
-                    } else {
-                        model.addAttribute(attribute);
-                    }
-                    //OD-GWT: end change.
-
+                    model.addAttribute(attribute);
                 });
             }
             this.getClientModelStore().add(model);
