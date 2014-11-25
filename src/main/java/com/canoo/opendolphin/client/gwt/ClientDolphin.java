@@ -139,6 +139,9 @@ public class ClientDolphin extends JavaScriptObject {
 	public final void addModelStoreListener(ModelStoreChangeHandler handler) {
 		getClientModelStore().addModelStoreListener(handler);
 	}
+	public final void addModelStoreListenerForType(String presentationModelType, ModelStoreChangeHandler handler) {
+		getClientModelStore().addModelStoreListenerForType(presentationModelType, handler);
+	}
 
 	public final native void startPushListening(String pushActionName, String releaseActionName) /*-{
 		this.startPushListening(pushActionName, releaseActionName);
