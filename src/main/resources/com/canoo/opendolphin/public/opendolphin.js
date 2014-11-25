@@ -1,19 +1,5 @@
 var opendolphin;
 (function (opendolphin) {
-    var Attribute = (function () {
-        function Attribute() {
-        }
-        Attribute.QUALIFIER_PROPERTY = "qualifier";
-        Attribute.DIRTY_PROPERTY = "dirty";
-        Attribute.BASE_VALUE = "baseValue";
-        Attribute.VALUE = "value";
-        Attribute.TAG = "tag";
-        return Attribute;
-    })();
-    opendolphin.Attribute = Attribute;
-})(opendolphin || (opendolphin = {}));
-var opendolphin;
-(function (opendolphin) {
     var Command = (function () {
         function Command() {
             this.id = "dolphin-core-command";
@@ -94,69 +80,25 @@ var opendolphin;
     })(opendolphin.Command);
     opendolphin.AttributeCreatedNotification = AttributeCreatedNotification;
 })(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
 var opendolphin;
 (function (opendolphin) {
-    var AttributeMetadataChangedCommand = (function (_super) {
-        __extends(AttributeMetadataChangedCommand, _super);
-        function AttributeMetadataChangedCommand(attributeId, metadataName, value) {
-            _super.call(this);
-            this.attributeId = attributeId;
-            this.metadataName = metadataName;
-            this.value = value;
-            this.id = 'AttributeMetadataChanged';
-            this.className = "org.opendolphin.core.comm.AttributeMetadataChangedCommand";
+    var Codec = (function () {
+        function Codec() {
         }
-        return AttributeMetadataChangedCommand;
-    })(opendolphin.Command);
-    opendolphin.AttributeMetadataChangedCommand = AttributeMetadataChangedCommand;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var BaseValueChangedCommand = (function (_super) {
-        __extends(BaseValueChangedCommand, _super);
-        function BaseValueChangedCommand(attributeId) {
-            _super.call(this);
-            this.attributeId = attributeId;
-            this.id = 'BaseValueChanged';
-            this.className = "org.opendolphin.core.comm.BaseValueChangedCommand";
-        }
-        return BaseValueChangedCommand;
-    })(opendolphin.Command);
-    opendolphin.BaseValueChangedCommand = BaseValueChangedCommand;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var CallNamedActionCommand = (function (_super) {
-        __extends(CallNamedActionCommand, _super);
-        function CallNamedActionCommand(actionName) {
-            _super.call(this);
-            this.actionName = actionName;
-            this.id = 'CallNamedAction';
-            this.className = "org.opendolphin.core.comm.CallNamedActionCommand";
-        }
-        return CallNamedActionCommand;
-    })(opendolphin.Command);
-    opendolphin.CallNamedActionCommand = CallNamedActionCommand;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var ChangeAttributeMetadataCommand = (function (_super) {
-        __extends(ChangeAttributeMetadataCommand, _super);
-        function ChangeAttributeMetadataCommand(attributeId, metadataName, value) {
-            _super.call(this);
-            this.attributeId = attributeId;
-            this.metadataName = metadataName;
-            this.value = value;
-            this.id = 'ChangeAttributeMetadata';
-            this.className = "org.opendolphin.core.comm.ChangeAttributeMetadataCommand";
-        }
-        return ChangeAttributeMetadataCommand;
-    })(opendolphin.Command);
-    opendolphin.ChangeAttributeMetadataCommand = ChangeAttributeMetadataCommand;
+        Codec.prototype.encode = function (commands) {
+            return JSON.stringify(commands);
+        };
+
+        Codec.prototype.decode = function (transmitted) {
+            if (typeof transmitted == 'string') {
+                return JSON.parse(transmitted);
+            } else {
+                return transmitted;
+            }
+        };
+        return Codec;
+    })();
+    opendolphin.Codec = Codec;
 })(opendolphin || (opendolphin = {}));
 var opendolphin;
 (function (opendolphin) {
@@ -175,6 +117,170 @@ var opendolphin;
         return EventBus;
     })();
     opendolphin.EventBus = EventBus;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="ClientPresentationModel.ts" />
+/// <reference path="EventBus.ts" />
+/// <reference path="Tag.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var ClientAttribute = (function () {
+        function ClientAttribute(propertyName, qualifier, value, tag) {
+            if (typeof tag === "undefined") { tag = opendolphin.Tag.value(); }
+            this.propertyName = propertyName;
+            this.tag = tag;
+            this.dirty = false;
+            this.id = "" + (ClientAttribute.clientAttributeInstanceCount++) + "C";
+            this.valueChangeBus = new opendolphin.EventBus();
+            this.qualifierChangeBus = new opendolphin.EventBus();
+            this.dirtyValueChangeBus = new opendolphin.EventBus();
+            this.baseValueChangeBus = new opendolphin.EventBus();
+            this.setValue(value);
+            this.setBaseValue(value);
+            this.setQualifier(qualifier);
+        }
+        /** a copy constructor with new id and no presentation model */
+        ClientAttribute.prototype.copy = function () {
+            var result = new ClientAttribute(this.propertyName, this.getQualifier(), this.getValue(), this.tag);
+            result.setBaseValue(this.getBaseValue());
+            return result;
+        };
+
+        ClientAttribute.prototype.isDirty = function () {
+            return this.dirty;
+        };
+
+        ClientAttribute.prototype.getBaseValue = function () {
+            return this.baseValue;
+        };
+
+        ClientAttribute.prototype.setPresentationModel = function (presentationModel) {
+            if (this.presentationModel) {
+                alert("You can not set a presentation model for an attribute that is already bound.");
+            }
+            this.presentationModel = presentationModel;
+        };
+
+        ClientAttribute.prototype.getPresentationModel = function () {
+            return this.presentationModel;
+        };
+
+        ClientAttribute.prototype.getValue = function () {
+            return this.value;
+        };
+
+        ClientAttribute.prototype.setValue = function (newValue) {
+            var verifiedValue = ClientAttribute.checkValue(newValue);
+            if (this.value == verifiedValue)
+                return;
+            var oldValue = this.value;
+            this.value = verifiedValue;
+            this.setDirty(this.calculateDirty(this.baseValue, verifiedValue));
+            this.valueChangeBus.trigger({ 'oldValue': oldValue, 'newValue': verifiedValue });
+        };
+
+        ClientAttribute.prototype.calculateDirty = function (baseValue, value) {
+            if (baseValue == null) {
+                return value != null;
+            } else {
+                return baseValue != value;
+            }
+        };
+
+        ClientAttribute.prototype.updateDirty = function () {
+            this.setDirty(this.calculateDirty(this.baseValue, this.value));
+        };
+
+        ClientAttribute.prototype.setDirty = function (dirty) {
+            var oldVal = this.dirty;
+            this.dirty = dirty;
+            this.dirtyValueChangeBus.trigger({ 'oldValue': oldVal, 'newValue': this.dirty });
+            if (this.presentationModel)
+                this.presentationModel.updateDirty();
+        };
+
+        ClientAttribute.prototype.setQualifier = function (newQualifier) {
+            if (this.qualifier == newQualifier)
+                return;
+            var oldQualifier = this.qualifier;
+            this.qualifier = newQualifier;
+            this.qualifierChangeBus.trigger({ 'oldValue': oldQualifier, 'newValue': newQualifier });
+        };
+
+        ClientAttribute.prototype.getQualifier = function () {
+            return this.qualifier;
+        };
+
+        ClientAttribute.prototype.setBaseValue = function (baseValue) {
+            if (this.baseValue == baseValue)
+                return;
+            var oldBaseValue = this.baseValue;
+            this.baseValue = baseValue;
+            this.setDirty(this.calculateDirty(baseValue, this.value));
+            this.baseValueChangeBus.trigger({ 'oldValue': oldBaseValue, 'newValue': baseValue });
+        };
+
+        ClientAttribute.prototype.rebase = function () {
+            this.setBaseValue(this.value);
+            this.setDirty(false); // this is not superfluous!
+        };
+
+        ClientAttribute.prototype.reset = function () {
+            this.setValue(this.baseValue);
+            this.setDirty(false); // this is not superfluous!
+        };
+
+        ClientAttribute.checkValue = function (value) {
+            if (value == null || value == undefined) {
+                return null;
+            }
+            var result = value;
+            if (result instanceof String || result instanceof Boolean || result instanceof Number) {
+                result = value.valueOf();
+            }
+            if (result instanceof ClientAttribute) {
+                console.log("An Attribute may not itself contain an attribute as a value. Assuming you forgot to call value.");
+                result = this.checkValue(value.value);
+            }
+            var ok = false;
+            if (this.SUPPORTED_VALUE_TYPES.indexOf(typeof result) > -1 || result instanceof Date) {
+                ok = true;
+            }
+            if (!ok) {
+                throw new Error("Attribute values of this type are not allowed: " + typeof value);
+            }
+            return result;
+        };
+
+        ClientAttribute.prototype.onValueChange = function (eventHandler) {
+            this.valueChangeBus.onEvent(eventHandler);
+            eventHandler({ "oldValue": this.value, "newValue": this.value });
+        };
+
+        ClientAttribute.prototype.onQualifierChange = function (eventHandler) {
+            this.qualifierChangeBus.onEvent(eventHandler);
+        };
+
+        ClientAttribute.prototype.onDirty = function (eventHandler) {
+            this.dirtyValueChangeBus.onEvent(eventHandler);
+        };
+
+        ClientAttribute.prototype.onBaseValueChange = function (eventHandler) {
+            this.baseValueChangeBus.onEvent(eventHandler);
+        };
+
+        ClientAttribute.prototype.syncWith = function (sourceAttribute) {
+            if (sourceAttribute) {
+                this.setQualifier(sourceAttribute.getQualifier()); // sequence is important
+                this.setBaseValue(sourceAttribute.getBaseValue());
+                this.setValue(sourceAttribute.value);
+                // syncing propertyName and tag is not needed since they must be identical anyway
+            }
+        };
+        ClientAttribute.SUPPORTED_VALUE_TYPES = ["string", "number", "boolean"];
+        ClientAttribute.clientAttributeInstanceCount = 0;
+        return ClientAttribute;
+    })();
+    opendolphin.ClientAttribute = ClientAttribute;
 })(opendolphin || (opendolphin = {}));
 /// <reference path="ClientAttribute.ts" />
 /// <reference path="EventBus.ts" />
@@ -357,185 +463,28 @@ var opendolphin;
     opendolphin.ClientPresentationModel = ClientPresentationModel;
 })(opendolphin || (opendolphin = {}));
 /// <reference path="ClientPresentationModel.ts" />
-/// <reference path="EventBus.ts" />
+/// <reference path="ClientAttribute.ts" />
+/// <reference path="Command.ts" />
 /// <reference path="Tag.ts" />
 var opendolphin;
 (function (opendolphin) {
-    var ClientAttribute = (function () {
-        function ClientAttribute(propertyName, qualifier, value, tag) {
+    var InitializeAttributeCommand = (function (_super) {
+        __extends(InitializeAttributeCommand, _super);
+        function InitializeAttributeCommand(pmId, pmType, propertyName, qualifier, newValue, tag) {
             if (typeof tag === "undefined") { tag = opendolphin.Tag.value(); }
-            this.propertyName = propertyName;
-            this.tag = tag;
-            this.dirty = false;
-            this.id = "" + (ClientAttribute.clientAttributeInstanceCount++) + "C";
-            this.valueChangeBus = new opendolphin.EventBus();
-            this.qualifierChangeBus = new opendolphin.EventBus();
-            this.dirtyValueChangeBus = new opendolphin.EventBus();
-            this.baseValueChangeBus = new opendolphin.EventBus();
-            this.setValue(value);
-            this.setBaseValue(value);
-            this.setQualifier(qualifier);
-        }
-        /** a copy constructor with new id and no presentation model */
-        ClientAttribute.prototype.copy = function () {
-            var result = new ClientAttribute(this.propertyName, this.getQualifier(), this.getValue(), this.tag);
-            result.setBaseValue(this.getBaseValue());
-            return result;
-        };
-
-        ClientAttribute.prototype.isDirty = function () {
-            return this.dirty;
-        };
-
-        ClientAttribute.prototype.getBaseValue = function () {
-            return this.baseValue;
-        };
-
-        ClientAttribute.prototype.setPresentationModel = function (presentationModel) {
-            if (this.presentationModel) {
-                alert("You can not set a presentation model for an attribute that is already bound.");
-            }
-            this.presentationModel = presentationModel;
-        };
-
-        ClientAttribute.prototype.getPresentationModel = function () {
-            return this.presentationModel;
-        };
-
-        ClientAttribute.prototype.getValue = function () {
-            return this.value;
-        };
-
-        ClientAttribute.prototype.setValue = function (newValue) {
-            var verifiedValue = ClientAttribute.checkValue(newValue);
-            if (this.value == verifiedValue)
-                return;
-            var oldValue = this.value;
-            this.value = verifiedValue;
-            this.setDirty(this.calculateDirty(this.baseValue, verifiedValue));
-            this.valueChangeBus.trigger({ 'oldValue': oldValue, 'newValue': verifiedValue });
-        };
-
-        ClientAttribute.prototype.calculateDirty = function (baseValue, value) {
-            if (baseValue == null) {
-                return value != null;
-            } else {
-                return baseValue != value;
-            }
-        };
-
-        ClientAttribute.prototype.updateDirty = function () {
-            this.setDirty(this.calculateDirty(this.baseValue, this.value));
-        };
-
-        ClientAttribute.prototype.setDirty = function (dirty) {
-            var oldVal = this.dirty;
-            this.dirty = dirty;
-            this.dirtyValueChangeBus.trigger({ 'oldValue': oldVal, 'newValue': this.dirty });
-            if (this.presentationModel)
-                this.presentationModel.updateDirty();
-        };
-
-        ClientAttribute.prototype.setQualifier = function (newQualifier) {
-            if (this.qualifier == newQualifier)
-                return;
-            var oldQualifier = this.qualifier;
-            this.qualifier = newQualifier;
-            this.qualifierChangeBus.trigger({ 'oldValue': oldQualifier, 'newValue': newQualifier });
-        };
-
-        ClientAttribute.prototype.getQualifier = function () {
-            return this.qualifier;
-        };
-
-        ClientAttribute.prototype.setBaseValue = function (baseValue) {
-            if (this.baseValue == baseValue)
-                return;
-            var oldBaseValue = this.baseValue;
-            this.baseValue = baseValue;
-            this.setDirty(this.calculateDirty(baseValue, this.value));
-            this.baseValueChangeBus.trigger({ 'oldValue': oldBaseValue, 'newValue': baseValue });
-        };
-
-        ClientAttribute.prototype.rebase = function () {
-            this.setBaseValue(this.value);
-            this.setDirty(false); // this is not superfluous!
-        };
-
-        ClientAttribute.prototype.reset = function () {
-            this.setValue(this.baseValue);
-            this.setDirty(false); // this is not superfluous!
-        };
-
-        ClientAttribute.checkValue = function (value) {
-            if (value == null || value == undefined) {
-                return null;
-            }
-            var result = value;
-            if (result instanceof String || result instanceof Boolean || result instanceof Number) {
-                result = value.valueOf();
-            }
-            if (result instanceof ClientAttribute) {
-                console.log("An Attribute may not itself contain an attribute as a value. Assuming you forgot to call value.");
-                result = this.checkValue(value.value);
-            }
-            var ok = false;
-            if (this.SUPPORTED_VALUE_TYPES.indexOf(typeof result) > -1 || result instanceof Date) {
-                ok = true;
-            }
-            if (!ok) {
-                throw new Error("Attribute values of this type are not allowed: " + typeof value);
-            }
-            return result;
-        };
-
-        ClientAttribute.prototype.onValueChange = function (eventHandler) {
-            this.valueChangeBus.onEvent(eventHandler);
-            eventHandler({ "oldValue": this.value, "newValue": this.value });
-        };
-
-        ClientAttribute.prototype.onQualifierChange = function (eventHandler) {
-            this.qualifierChangeBus.onEvent(eventHandler);
-        };
-
-        ClientAttribute.prototype.onDirty = function (eventHandler) {
-            this.dirtyValueChangeBus.onEvent(eventHandler);
-        };
-
-        ClientAttribute.prototype.onBaseValueChange = function (eventHandler) {
-            this.baseValueChangeBus.onEvent(eventHandler);
-        };
-
-        ClientAttribute.prototype.syncWith = function (sourceAttribute) {
-            if (sourceAttribute) {
-                this.setQualifier(sourceAttribute.getQualifier()); // sequence is important
-                this.setBaseValue(sourceAttribute.getBaseValue());
-                this.setValue(sourceAttribute.value);
-                // syncing propertyName and tag is not needed since they must be identical anyway
-            }
-        };
-        ClientAttribute.SUPPORTED_VALUE_TYPES = ["string", "number", "boolean"];
-        ClientAttribute.clientAttributeInstanceCount = 0;
-        return ClientAttribute;
-    })();
-    opendolphin.ClientAttribute = ClientAttribute;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts"/>
-var opendolphin;
-(function (opendolphin) {
-    var ValueChangedCommand = (function (_super) {
-        __extends(ValueChangedCommand, _super);
-        function ValueChangedCommand(attributeId, oldValue, newValue) {
             _super.call(this);
-            this.attributeId = attributeId;
-            this.oldValue = oldValue;
+            this.pmId = pmId;
+            this.pmType = pmType;
+            this.propertyName = propertyName;
+            this.qualifier = qualifier;
             this.newValue = newValue;
-            this.id = "ValueChanged";
-            this.className = "org.opendolphin.core.comm.ValueChangedCommand";
+            this.tag = tag;
+            this.id = 'InitializeAttribute';
+            this.className = "org.opendolphin.core.comm.InitializeAttributeCommand";
         }
-        return ValueChangedCommand;
+        return InitializeAttributeCommand;
     })(opendolphin.Command);
-    opendolphin.ValueChangedCommand = ValueChangedCommand;
+    opendolphin.InitializeAttributeCommand = InitializeAttributeCommand;
 })(opendolphin || (opendolphin = {}));
 /// <reference path="Command.ts"/>
 var opendolphin;
@@ -554,6 +503,20 @@ var opendolphin;
 /// <reference path="Command.ts"/>
 var opendolphin;
 (function (opendolphin) {
+    var SignalCommand = (function (_super) {
+        __extends(SignalCommand, _super);
+        function SignalCommand(name) {
+            _super.call(this);
+            this.id = name;
+            this.className = "org.opendolphin.core.comm.SignalCommand";
+        }
+        return SignalCommand;
+    })(opendolphin.Command);
+    opendolphin.SignalCommand = SignalCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts"/>
+var opendolphin;
+(function (opendolphin) {
     var EmptyNotification = (function (_super) {
         __extends(EmptyNotification, _super);
         function EmptyNotification() {
@@ -564,6 +527,23 @@ var opendolphin;
         return EmptyNotification;
     })(opendolphin.Command);
     opendolphin.EmptyNotification = EmptyNotification;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts"/>
+var opendolphin;
+(function (opendolphin) {
+    var ValueChangedCommand = (function (_super) {
+        __extends(ValueChangedCommand, _super);
+        function ValueChangedCommand(attributeId, oldValue, newValue) {
+            _super.call(this);
+            this.attributeId = attributeId;
+            this.oldValue = oldValue;
+            this.newValue = newValue;
+            this.id = "ValueChanged";
+            this.className = "org.opendolphin.core.comm.ValueChangedCommand";
+        }
+        return ValueChangedCommand;
+    })(opendolphin.Command);
+    opendolphin.ValueChangedCommand = ValueChangedCommand;
 })(opendolphin || (opendolphin = {}));
 /// <reference path="Command.ts"/>
 /// <reference path="ClientConnector.ts"/>
@@ -629,39 +609,128 @@ var opendolphin;
     })();
     opendolphin.BlindCommandBatcher = BlindCommandBatcher;
 })(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
 var opendolphin;
 (function (opendolphin) {
-    var Codec = (function () {
-        function Codec() {
-        }
-        Codec.prototype.encode = function (commands) {
-            return JSON.stringify(commands);
-        };
-
-        Codec.prototype.decode = function (transmitted) {
-            if (typeof transmitted == 'string') {
-                return JSON.parse(transmitted);
-            } else {
-                return transmitted;
-            }
-        };
-        return Codec;
-    })();
-    opendolphin.Codec = Codec;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts"/>
-var opendolphin;
-(function (opendolphin) {
-    var SignalCommand = (function (_super) {
-        __extends(SignalCommand, _super);
-        function SignalCommand(name) {
+    var CallNamedActionCommand = (function (_super) {
+        __extends(CallNamedActionCommand, _super);
+        function CallNamedActionCommand(actionName) {
             _super.call(this);
-            this.id = name;
-            this.className = "org.opendolphin.core.comm.SignalCommand";
+            this.actionName = actionName;
+            this.id = 'CallNamedAction';
+            this.className = "org.opendolphin.core.comm.CallNamedActionCommand";
         }
-        return SignalCommand;
+        return CallNamedActionCommand;
     })(opendolphin.Command);
-    opendolphin.SignalCommand = SignalCommand;
+    opendolphin.CallNamedActionCommand = CallNamedActionCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var AttributeMetadataChangedCommand = (function (_super) {
+        __extends(AttributeMetadataChangedCommand, _super);
+        function AttributeMetadataChangedCommand(attributeId, metadataName, value) {
+            _super.call(this);
+            this.attributeId = attributeId;
+            this.metadataName = metadataName;
+            this.value = value;
+            this.id = 'AttributeMetadataChanged';
+            this.className = "org.opendolphin.core.comm.AttributeMetadataChangedCommand";
+        }
+        return AttributeMetadataChangedCommand;
+    })(opendolphin.Command);
+    opendolphin.AttributeMetadataChangedCommand = AttributeMetadataChangedCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var PresentationModelResetedCommand = (function (_super) {
+        __extends(PresentationModelResetedCommand, _super);
+        function PresentationModelResetedCommand(pmId) {
+            _super.call(this);
+            this.pmId = pmId;
+            this.id = 'PresentationModelReseted';
+            this.className = "org.opendolphin.core.comm.PresentationModelResetedCommand";
+        }
+        return PresentationModelResetedCommand;
+    })(opendolphin.Command);
+    opendolphin.PresentationModelResetedCommand = PresentationModelResetedCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var SavedPresentationModelNotification = (function (_super) {
+        __extends(SavedPresentationModelNotification, _super);
+        function SavedPresentationModelNotification(pmId) {
+            _super.call(this);
+            this.pmId = pmId;
+            this.id = 'SavedPresentationModel';
+            this.className = "org.opendolphin.core.comm.SavedPresentationModelNotification";
+        }
+        return SavedPresentationModelNotification;
+    })(opendolphin.Command);
+    opendolphin.SavedPresentationModelNotification = SavedPresentationModelNotification;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var SwitchPresentationModelCommand = (function (_super) {
+        __extends(SwitchPresentationModelCommand, _super);
+        function SwitchPresentationModelCommand(pmId, sourcePmId) {
+            _super.call(this);
+            this.pmId = pmId;
+            this.sourcePmId = sourcePmId;
+            this.id = 'SwitchPresentationModel';
+            this.className = "org.opendolphin.core.comm.SwitchPresentationModelCommand";
+        }
+        return SwitchPresentationModelCommand;
+    })(opendolphin.Command);
+    opendolphin.SwitchPresentationModelCommand = SwitchPresentationModelCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var BaseValueChangedCommand = (function (_super) {
+        __extends(BaseValueChangedCommand, _super);
+        function BaseValueChangedCommand(attributeId) {
+            _super.call(this);
+            this.attributeId = attributeId;
+            this.id = 'BaseValueChanged';
+            this.className = "org.opendolphin.core.comm.BaseValueChangedCommand";
+        }
+        return BaseValueChangedCommand;
+    })(opendolphin.Command);
+    opendolphin.BaseValueChangedCommand = BaseValueChangedCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var DeleteAllPresentationModelsOfTypeCommand = (function (_super) {
+        __extends(DeleteAllPresentationModelsOfTypeCommand, _super);
+        function DeleteAllPresentationModelsOfTypeCommand(pmType) {
+            _super.call(this);
+            this.pmType = pmType;
+            this.id = 'DeleteAllPresentationModelsOfType';
+            this.className = "org.opendolphin.core.comm.DeleteAllPresentationModelsOfTypeCommand";
+        }
+        return DeleteAllPresentationModelsOfTypeCommand;
+    })(opendolphin.Command);
+    opendolphin.DeleteAllPresentationModelsOfTypeCommand = DeleteAllPresentationModelsOfTypeCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var DeletePresentationModelCommand = (function (_super) {
+        __extends(DeletePresentationModelCommand, _super);
+        function DeletePresentationModelCommand(pmId) {
+            _super.call(this);
+            this.pmId = pmId;
+            this.id = 'DeletePresentationModel';
+            this.className = "org.opendolphin.core.comm.DeletePresentationModelCommand";
+        }
+        return DeletePresentationModelCommand;
+    })(opendolphin.Command);
+    opendolphin.DeletePresentationModelCommand = DeletePresentationModelCommand;
 })(opendolphin || (opendolphin = {}));
 /// <reference path="ClientPresentationModel.ts" />
 /// <reference path="ClientAttribute.ts" />
@@ -693,6 +762,352 @@ var opendolphin;
         return CreatePresentationModelCommand;
     })(opendolphin.Command);
     opendolphin.CreatePresentationModelCommand = CreatePresentationModelCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var DataCommand = (function (_super) {
+        __extends(DataCommand, _super);
+        function DataCommand(data) {
+            _super.call(this);
+            this.data = data;
+            this.id = "Data";
+            this.className = "org.opendolphin.core.comm.DataCommand";
+        }
+        return DataCommand;
+    })(opendolphin.Command);
+    opendolphin.DataCommand = DataCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="ClientPresentationModel.ts" />
+/// <reference path="Command.ts" />
+/// <reference path="CommandBatcher.ts" />
+/// <reference path="Codec.ts" />
+/// <reference path="CallNamedActionCommand.ts" />
+/// <reference path="ClientDolphin.ts" />
+/// <reference path="AttributeMetadataChangedCommand.ts" />
+/// <reference path="ClientAttribute.ts" />
+/// <reference path="PresentationModelResetedCommand.ts" />
+/// <reference path="SavedPresentationModelNotification.ts" />
+/// <reference path="InitializeAttributeCommand.ts" />
+/// <reference path="SwitchPresentationModelCommand.ts" />
+/// <reference path="BaseValueChangedCommand.ts" />
+/// <reference path="ValueChangedCommand.ts" />
+/// <reference path="DeleteAllPresentationModelsOfTypeCommand.ts" />
+/// <reference path="DeleteAllPresentationModelsOfTypeCommand.ts" />
+/// <reference path="DeletePresentationModelCommand.ts" />
+/// <reference path="CreatePresentationModelCommand.ts" />
+/// <reference path="DataCommand.ts" />
+/// <reference path="NamedCommand.ts" />
+/// <reference path="SignalCommand.ts" />
+/// <reference path="Tag.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var ClientConnector = (function () {
+        function ClientConnector(transmitter, clientDolphin, slackMS) {
+            if (typeof slackMS === "undefined") { slackMS = 0; }
+            this.commandQueue = [];
+            this.currentlySending = false;
+            this.commandBatcher = new opendolphin.BlindCommandBatcher(true);
+            this.pushEnabled = false;
+            this.waiting = false;
+            this.transmitter = transmitter;
+            this.clientDolphin = clientDolphin;
+            this.slackMS = slackMS;
+            this.codec = new opendolphin.Codec();
+        }
+        ClientConnector.prototype.setCommandBatcher = function (newBatcher) {
+            this.commandBatcher = newBatcher;
+        };
+        ClientConnector.prototype.setPushEnabled = function (enabled) {
+            this.pushEnabled = enabled;
+        };
+        ClientConnector.prototype.setPushListener = function (newListener) {
+            this.pushListener = newListener;
+        };
+        ClientConnector.prototype.setReleaseCommand = function (newCommand) {
+            this.releaseCommand = newCommand;
+        };
+
+        ClientConnector.prototype.send = function (command, onFinished) {
+            this.commandQueue.push({ command: command, handler: onFinished });
+            if (this.currentlySending) {
+                if (command != this.pushListener)
+                    this.release(); // there is not point in releasing if we do not send atm
+                return;
+            }
+            this.doSendNext();
+        };
+
+        ClientConnector.prototype.doSendNext = function () {
+            var _this = this;
+            if (this.commandQueue.length < 1) {
+                this.currentlySending = false;
+                return;
+            }
+            this.currentlySending = true;
+
+            var cmdsAndHandlers = this.commandBatcher.batch(this.commandQueue);
+            var callback = cmdsAndHandlers[cmdsAndHandlers.length - 1].handler;
+            var commands = cmdsAndHandlers.map(function (cah) {
+                return cah.command;
+            });
+            this.transmitter.transmit(commands, function (response) {
+                //console.log("server response: [" + response.map(it => it.id).join(", ") + "] ");
+                var touchedPMs = [];
+                response.forEach(function (command) {
+                    var touched = _this.handle(command);
+                    if (touched)
+                        touchedPMs.push(touched);
+                });
+
+                if (callback) {
+                    callback.onFinished(touchedPMs); // todo: make them unique?
+                    // todo dk: handling of data from datacommand
+                }
+
+                // recursive call: fetch the next in line but allow a bit of slack such that
+                // document events can fire, rendering is done and commands can batch up
+                setTimeout(function () {
+                    return _this.doSendNext();
+                }, _this.slackMS);
+            });
+        };
+
+        ClientConnector.prototype.handle = function (command) {
+            if (command.id == "Data") {
+                return this.handleDataCommand(command);
+            } else if (command.id == "DeletePresentationModel") {
+                return this.handleDeletePresentationModelCommand(command);
+            } else if (command.id == "DeleteAllPresentationModelsOfType") {
+                return this.handleDeleteAllPresentationModelOfTypeCommand(command);
+            } else if (command.id == "CreatePresentationModel") {
+                return this.handleCreatePresentationModelCommand(command);
+            } else if (command.id == "ValueChanged") {
+                return this.handleValueChangedCommand(command);
+            } else if (command.id == "BaseValueChanged") {
+                return this.handleBaseValueChangedCommand(command);
+            } else if (command.id == "SwitchPresentationModel") {
+                return this.handleSwitchPresentationModelCommand(command);
+            } else if (command.id == "InitializeAttribute") {
+                return this.handleInitializeAttributeCommand(command);
+            } else if (command.id == "SavedPresentationModel") {
+                return this.handleSavedPresentationModelNotification(command);
+            } else if (command.id == "PresentationModelReseted") {
+                return this.handlePresentationModelResetedCommand(command);
+            } else if (command.id == "AttributeMetadataChanged") {
+                return this.handleAttributeMetadataChangedCommand(command);
+            } else if (command.id == "CallNamedAction") {
+                return this.handleCallNamedActionCommand(command);
+            } else {
+                console.log("Cannot handle, unknown command " + command);
+            }
+
+            return null;
+        };
+        ClientConnector.prototype.handleDataCommand = function (serverCommand) {
+            return serverCommand.data;
+        };
+        ClientConnector.prototype.handleDeletePresentationModelCommand = function (serverCommand) {
+            var model = this.clientDolphin.findPresentationModelById(serverCommand.pmId);
+            if (!model)
+                return null;
+            this.clientDolphin.getClientModelStore().deletePresentationModel(model, true);
+            return model;
+        };
+        ClientConnector.prototype.handleDeleteAllPresentationModelOfTypeCommand = function (serverCommand) {
+            this.clientDolphin.deleteAllPresentationModelOfType(serverCommand.pmType);
+            return null;
+        };
+        ClientConnector.prototype.handleCreatePresentationModelCommand = function (serverCommand) {
+            var _this = this;
+            if (this.clientDolphin.getClientModelStore().containsPresentationModel(serverCommand.pmId)) {
+                throw new Error("There already is a presentation model with id " + serverCommand.pmId + "  known to the client.");
+            }
+            var attributes = [];
+            serverCommand.attributes.forEach(function (attr) {
+                var clientAttribute = _this.clientDolphin.attribute(attr.propertyName, attr.qualifier, attr.value, attr.tag ? attr.tag : opendolphin.Tag.value());
+                clientAttribute.setBaseValue(attr.baseValue);
+                if (attr.id && attr.id.match(".*S$")) {
+                    clientAttribute.id = attr.id;
+                }
+                attributes.push(clientAttribute);
+            });
+            var clientPm = new opendolphin.ClientPresentationModel(serverCommand.pmId, serverCommand.pmType);
+            clientPm.addAttributes(attributes);
+            if (serverCommand.clientSideOnly) {
+                clientPm.clientSideOnly = true;
+            }
+            this.clientDolphin.getClientModelStore().add(clientPm);
+            this.clientDolphin.updatePresentationModelQualifier(clientPm);
+            clientPm.updateAttributeDirtyness();
+            clientPm.updateDirty();
+            return clientPm;
+        };
+        ClientConnector.prototype.handleValueChangedCommand = function (serverCommand) {
+            var clientAttribute = this.clientDolphin.getClientModelStore().findAttributeById(serverCommand.attributeId);
+            if (!clientAttribute) {
+                console.log("attribute with id " + serverCommand.attributeId + " not found, cannot update old value " + serverCommand.oldValue + " to new value " + serverCommand.newValue);
+                return null;
+            }
+            if (clientAttribute.getValue() == serverCommand.newValue) {
+                //console.log("nothing to do. new value == old value");
+                return null;
+            }
+
+            // Below was the code that would enforce that value changes only appear when the proper oldValue is given.
+            // While that seemed appropriate at first, there are actually valid command sequences where the oldValue is not properly set.
+            // We leave the commented code in the codebase to allow for logging/debugging such cases.
+            //            if(clientAttribute.getValue() != serverCommand.oldValue) {
+            //                console.log("attribute with id "+serverCommand.attributeId+" and value " + clientAttribute.getValue() +
+            //                            " was set to value " + serverCommand.newValue + " even though the change was based on an outdated old value of " + serverCommand.oldValue);
+            //            }
+            clientAttribute.setValue(serverCommand.newValue);
+            return null;
+        };
+        ClientConnector.prototype.handleBaseValueChangedCommand = function (serverCommand) {
+            var clientAttribute = this.clientDolphin.getClientModelStore().findAttributeById(serverCommand.attributeId);
+            if (!clientAttribute) {
+                console.log("attribute with id " + serverCommand.attributeId + " not found, cannot set base value.");
+                return null;
+            }
+            clientAttribute.rebase();
+            return null;
+        };
+        ClientConnector.prototype.handleSwitchPresentationModelCommand = function (serverCommand) {
+            var switchPm = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.pmId);
+            if (!switchPm) {
+                console.log("switch model with id " + serverCommand.pmId + " not found, cannot switch.");
+                return null;
+            }
+            var sourcePm = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.sourcePmId);
+            if (!sourcePm) {
+                console.log("source model with id " + serverCommand.sourcePmId + " not found, cannot switch.");
+                return null;
+            }
+            switchPm.syncWith(sourcePm);
+            return switchPm;
+        };
+        ClientConnector.prototype.handleInitializeAttributeCommand = function (serverCommand) {
+            var attribute = new opendolphin.ClientAttribute(serverCommand.propertyName, serverCommand.qualifier, serverCommand.newValue, serverCommand.tag);
+            if (serverCommand.qualifier) {
+                var attributesCopy = this.clientDolphin.getClientModelStore().findAllAttributesByQualifier(serverCommand.qualifier);
+                if (attributesCopy) {
+                    if (!serverCommand.newValue) {
+                        var attr = attributesCopy.shift();
+                        if (attr) {
+                            attribute.setValue(attr.getValue());
+                        }
+                    } else {
+                        attributesCopy.forEach(function (attr) {
+                            attr.setValue(attribute.getValue());
+                        });
+                    }
+                }
+            }
+            var presentationModel;
+            if (serverCommand.pmId) {
+                presentationModel = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.pmId);
+            }
+            if (!presentationModel) {
+                presentationModel = new opendolphin.ClientPresentationModel(serverCommand.pmId, serverCommand.pmType);
+                this.clientDolphin.getClientModelStore().add(presentationModel);
+            }
+            this.clientDolphin.addAttributeToModel(presentationModel, attribute);
+            this.clientDolphin.updatePresentationModelQualifier(presentationModel);
+            return presentationModel;
+        };
+        ClientConnector.prototype.handleSavedPresentationModelNotification = function (serverCommand) {
+            if (!serverCommand.pmId)
+                return null;
+            var model = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.pmId);
+            if (!model) {
+                console.log("model with id " + serverCommand.pmId + " not found, cannot rebase.");
+                return null;
+            }
+            model.rebase();
+            return model;
+        };
+        ClientConnector.prototype.handlePresentationModelResetedCommand = function (serverCommand) {
+            if (!serverCommand.pmId)
+                return null;
+            var model = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.pmId);
+            if (!model) {
+                console.log("model with id " + serverCommand.pmId + " not found, cannot reset.");
+                return null;
+            }
+            model.reset();
+            return model;
+        };
+        ClientConnector.prototype.handleAttributeMetadataChangedCommand = function (serverCommand) {
+            var clientAttribute = this.clientDolphin.getClientModelStore().findAttributeById(serverCommand.attributeId);
+            if (!clientAttribute)
+                return null;
+            clientAttribute[serverCommand.metadataName] = serverCommand.value;
+            return null;
+        };
+        ClientConnector.prototype.handleCallNamedActionCommand = function (serverCommand) {
+            this.clientDolphin.send(serverCommand.actionName, null);
+            return null;
+        };
+
+        ///////////// push support ///////////////
+        ClientConnector.prototype.listen = function () {
+            if (!this.pushEnabled)
+                return;
+            if (this.waiting)
+                return;
+
+            // todo: how to issue a warning if no pushListener is set?
+            this.waiting = true;
+            var me = this;
+            this.send(this.pushListener, { onFinished: function (models) {
+                    me.waiting = false;
+                    me.listen();
+                }, onFinishedData: null });
+        };
+
+        ClientConnector.prototype.release = function () {
+            if (!this.waiting)
+                return;
+            this.waiting = false;
+
+            // todo: how to issue a warning if no releaseCommand is set?
+            this.transmitter.signal(this.releaseCommand);
+        };
+        return ClientConnector;
+    })();
+    opendolphin.ClientConnector = ClientConnector;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var ChangeAttributeMetadataCommand = (function (_super) {
+        __extends(ChangeAttributeMetadataCommand, _super);
+        function ChangeAttributeMetadataCommand(attributeId, metadataName, value) {
+            _super.call(this);
+            this.attributeId = attributeId;
+            this.metadataName = metadataName;
+            this.value = value;
+            this.id = 'ChangeAttributeMetadata';
+            this.className = "org.opendolphin.core.comm.ChangeAttributeMetadataCommand";
+        }
+        return ChangeAttributeMetadataCommand;
+    })(opendolphin.Command);
+    opendolphin.ChangeAttributeMetadataCommand = ChangeAttributeMetadataCommand;
+})(opendolphin || (opendolphin = {}));
+var opendolphin;
+(function (opendolphin) {
+    var Attribute = (function () {
+        function Attribute() {
+        }
+        Attribute.QUALIFIER_PROPERTY = "qualifier";
+        Attribute.DIRTY_PROPERTY = "dirty";
+        Attribute.BASE_VALUE = "baseValue";
+        Attribute.VALUE = "value";
+        Attribute.TAG = "tag";
+        return Attribute;
+    })();
+    opendolphin.Attribute = Attribute;
 })(opendolphin || (opendolphin = {}));
 var opendolphin;
 (function (opendolphin) {
@@ -1066,6 +1481,13 @@ var opendolphin;
         ClientModelStore.prototype.onModelStoreChange = function (eventHandler) {
             this.modelStoreChangeBus.onEvent(eventHandler);
         };
+        ClientModelStore.prototype.onModelStoreChangeForType = function (presentationModelType, eventHandler) {
+            this.modelStoreChangeBus.onEvent(function (pmStoreEvent) {
+                if (pmStoreEvent.clientPresentationModel.presentationModelType == presentationModelType) {
+                    eventHandler(pmStoreEvent);
+                }
+            });
+        };
         return ClientModelStore;
     })();
     opendolphin.ClientModelStore = ClientModelStore;
@@ -1213,435 +1635,29 @@ var opendolphin;
     })();
     opendolphin.ClientDolphin = ClientDolphin;
 })(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
+/// <reference path="Command.ts"/>
+/// <reference path="SignalCommand.ts"/>
+/// <reference path="ClientConnector.ts"/>
 var opendolphin;
 (function (opendolphin) {
-    var PresentationModelResetedCommand = (function (_super) {
-        __extends(PresentationModelResetedCommand, _super);
-        function PresentationModelResetedCommand(pmId) {
-            _super.call(this);
-            this.pmId = pmId;
-            this.id = 'PresentationModelReseted';
-            this.className = "org.opendolphin.core.comm.PresentationModelResetedCommand";
+    /**
+    * A transmitter that is not transmitting at all.
+    * It may serve as a stand-in when no real transmitter is needed.
+    */
+    var NoTransmitter = (function () {
+        function NoTransmitter() {
         }
-        return PresentationModelResetedCommand;
-    })(opendolphin.Command);
-    opendolphin.PresentationModelResetedCommand = PresentationModelResetedCommand;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var SavedPresentationModelNotification = (function (_super) {
-        __extends(SavedPresentationModelNotification, _super);
-        function SavedPresentationModelNotification(pmId) {
-            _super.call(this);
-            this.pmId = pmId;
-            this.id = 'SavedPresentationModel';
-            this.className = "org.opendolphin.core.comm.SavedPresentationModelNotification";
-        }
-        return SavedPresentationModelNotification;
-    })(opendolphin.Command);
-    opendolphin.SavedPresentationModelNotification = SavedPresentationModelNotification;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="ClientPresentationModel.ts" />
-/// <reference path="ClientAttribute.ts" />
-/// <reference path="Command.ts" />
-/// <reference path="Tag.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var InitializeAttributeCommand = (function (_super) {
-        __extends(InitializeAttributeCommand, _super);
-        function InitializeAttributeCommand(pmId, pmType, propertyName, qualifier, newValue, tag) {
-            if (typeof tag === "undefined") { tag = opendolphin.Tag.value(); }
-            _super.call(this);
-            this.pmId = pmId;
-            this.pmType = pmType;
-            this.propertyName = propertyName;
-            this.qualifier = qualifier;
-            this.newValue = newValue;
-            this.tag = tag;
-            this.id = 'InitializeAttribute';
-            this.className = "org.opendolphin.core.comm.InitializeAttributeCommand";
-        }
-        return InitializeAttributeCommand;
-    })(opendolphin.Command);
-    opendolphin.InitializeAttributeCommand = InitializeAttributeCommand;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var SwitchPresentationModelCommand = (function (_super) {
-        __extends(SwitchPresentationModelCommand, _super);
-        function SwitchPresentationModelCommand(pmId, sourcePmId) {
-            _super.call(this);
-            this.pmId = pmId;
-            this.sourcePmId = sourcePmId;
-            this.id = 'SwitchPresentationModel';
-            this.className = "org.opendolphin.core.comm.SwitchPresentationModelCommand";
-        }
-        return SwitchPresentationModelCommand;
-    })(opendolphin.Command);
-    opendolphin.SwitchPresentationModelCommand = SwitchPresentationModelCommand;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var DeleteAllPresentationModelsOfTypeCommand = (function (_super) {
-        __extends(DeleteAllPresentationModelsOfTypeCommand, _super);
-        function DeleteAllPresentationModelsOfTypeCommand(pmType) {
-            _super.call(this);
-            this.pmType = pmType;
-            this.id = 'DeleteAllPresentationModelsOfType';
-            this.className = "org.opendolphin.core.comm.DeleteAllPresentationModelsOfTypeCommand";
-        }
-        return DeleteAllPresentationModelsOfTypeCommand;
-    })(opendolphin.Command);
-    opendolphin.DeleteAllPresentationModelsOfTypeCommand = DeleteAllPresentationModelsOfTypeCommand;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var DeletePresentationModelCommand = (function (_super) {
-        __extends(DeletePresentationModelCommand, _super);
-        function DeletePresentationModelCommand(pmId) {
-            _super.call(this);
-            this.pmId = pmId;
-            this.id = 'DeletePresentationModel';
-            this.className = "org.opendolphin.core.comm.DeletePresentationModelCommand";
-        }
-        return DeletePresentationModelCommand;
-    })(opendolphin.Command);
-    opendolphin.DeletePresentationModelCommand = DeletePresentationModelCommand;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var DataCommand = (function (_super) {
-        __extends(DataCommand, _super);
-        function DataCommand(data) {
-            _super.call(this);
-            this.data = data;
-            this.id = "Data";
-            this.className = "org.opendolphin.core.comm.DataCommand";
-        }
-        return DataCommand;
-    })(opendolphin.Command);
-    opendolphin.DataCommand = DataCommand;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="ClientPresentationModel.ts" />
-/// <reference path="Command.ts" />
-/// <reference path="CommandBatcher.ts" />
-/// <reference path="Codec.ts" />
-/// <reference path="CallNamedActionCommand.ts" />
-/// <reference path="ClientDolphin.ts" />
-/// <reference path="AttributeMetadataChangedCommand.ts" />
-/// <reference path="ClientAttribute.ts" />
-/// <reference path="PresentationModelResetedCommand.ts" />
-/// <reference path="SavedPresentationModelNotification.ts" />
-/// <reference path="InitializeAttributeCommand.ts" />
-/// <reference path="SwitchPresentationModelCommand.ts" />
-/// <reference path="BaseValueChangedCommand.ts" />
-/// <reference path="ValueChangedCommand.ts" />
-/// <reference path="DeleteAllPresentationModelsOfTypeCommand.ts" />
-/// <reference path="DeleteAllPresentationModelsOfTypeCommand.ts" />
-/// <reference path="DeletePresentationModelCommand.ts" />
-/// <reference path="CreatePresentationModelCommand.ts" />
-/// <reference path="DataCommand.ts" />
-/// <reference path="NamedCommand.ts" />
-/// <reference path="SignalCommand.ts" />
-/// <reference path="Tag.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var ClientConnector = (function () {
-        function ClientConnector(transmitter, clientDolphin, slackMS) {
-            if (typeof slackMS === "undefined") { slackMS = 0; }
-            this.commandQueue = [];
-            this.currentlySending = false;
-            this.commandBatcher = new opendolphin.BlindCommandBatcher(true);
-            this.pushEnabled = false;
-            this.waiting = false;
-            this.transmitter = transmitter;
-            this.clientDolphin = clientDolphin;
-            this.slackMS = slackMS;
-            this.codec = new opendolphin.Codec();
-        }
-        ClientConnector.prototype.setCommandBatcher = function (newBatcher) {
-            this.commandBatcher = newBatcher;
-        };
-        ClientConnector.prototype.setPushEnabled = function (enabled) {
-            this.pushEnabled = enabled;
-        };
-        ClientConnector.prototype.setPushListener = function (newListener) {
-            this.pushListener = newListener;
-        };
-        ClientConnector.prototype.setReleaseCommand = function (newCommand) {
-            this.releaseCommand = newCommand;
+        NoTransmitter.prototype.transmit = function (commands, onDone) {
+            // do nothing special
+            onDone([]);
         };
 
-        ClientConnector.prototype.send = function (command, onFinished) {
-            this.commandQueue.push({ command: command, handler: onFinished });
-            if (this.currentlySending) {
-                if (command != this.pushListener)
-                    this.release(); // there is not point in releasing if we do not send atm
-                return;
-            }
-            this.doSendNext();
+        NoTransmitter.prototype.signal = function (command) {
+            // do nothing
         };
-
-        ClientConnector.prototype.doSendNext = function () {
-            var _this = this;
-            if (this.commandQueue.length < 1) {
-                this.currentlySending = false;
-                return;
-            }
-            this.currentlySending = true;
-
-            var cmdsAndHandlers = this.commandBatcher.batch(this.commandQueue);
-            var callback = cmdsAndHandlers[cmdsAndHandlers.length - 1].handler;
-            var commands = cmdsAndHandlers.map(function (cah) {
-                return cah.command;
-            });
-            this.transmitter.transmit(commands, function (response) {
-                //console.log("server response: [" + response.map(it => it.id).join(", ") + "] ");
-                var touchedPMs = [];
-                response.forEach(function (command) {
-                    var touched = _this.handle(command);
-                    if (touched)
-                        touchedPMs.push(touched);
-                });
-
-                if (callback) {
-                    callback.onFinished(touchedPMs); // todo: make them unique?
-                    // todo dk: handling of data from datacommand
-                }
-
-                // recursive call: fetch the next in line but allow a bit of slack such that
-                // document events can fire, rendering is done and commands can batch up
-                setTimeout(function () {
-                    return _this.doSendNext();
-                }, _this.slackMS);
-            });
-        };
-
-        ClientConnector.prototype.handle = function (command) {
-            if (command.id == "Data") {
-                return this.handleDataCommand(command);
-            } else if (command.id == "DeletePresentationModel") {
-                return this.handleDeletePresentationModelCommand(command);
-            } else if (command.id == "DeleteAllPresentationModelsOfType") {
-                return this.handleDeleteAllPresentationModelOfTypeCommand(command);
-            } else if (command.id == "CreatePresentationModel") {
-                return this.handleCreatePresentationModelCommand(command);
-            } else if (command.id == "ValueChanged") {
-                return this.handleValueChangedCommand(command);
-            } else if (command.id == "BaseValueChanged") {
-                return this.handleBaseValueChangedCommand(command);
-            } else if (command.id == "SwitchPresentationModel") {
-                return this.handleSwitchPresentationModelCommand(command);
-            } else if (command.id == "InitializeAttribute") {
-                return this.handleInitializeAttributeCommand(command);
-            } else if (command.id == "SavedPresentationModel") {
-                return this.handleSavedPresentationModelNotification(command);
-            } else if (command.id == "PresentationModelReseted") {
-                return this.handlePresentationModelResetedCommand(command);
-            } else if (command.id == "AttributeMetadataChanged") {
-                return this.handleAttributeMetadataChangedCommand(command);
-            } else if (command.id == "CallNamedAction") {
-                return this.handleCallNamedActionCommand(command);
-            } else {
-                console.log("Cannot handle, unknown command " + command);
-            }
-
-            return null;
-        };
-        ClientConnector.prototype.handleDataCommand = function (serverCommand) {
-            return serverCommand.data;
-        };
-        ClientConnector.prototype.handleDeletePresentationModelCommand = function (serverCommand) {
-            var model = this.clientDolphin.findPresentationModelById(serverCommand.pmId);
-            if (!model)
-                return null;
-            this.clientDolphin.getClientModelStore().deletePresentationModel(model, true);
-            return model;
-        };
-        ClientConnector.prototype.handleDeleteAllPresentationModelOfTypeCommand = function (serverCommand) {
-            this.clientDolphin.deleteAllPresentationModelOfType(serverCommand.pmType);
-            return null;
-        };
-        ClientConnector.prototype.handleCreatePresentationModelCommand = function (serverCommand) {
-            var _this = this;
-            if (this.clientDolphin.getClientModelStore().containsPresentationModel(serverCommand.pmId)) {
-                throw new Error("There already is a presentation model with id " + serverCommand.pmId + "  known to the client.");
-            }
-            var attributes = [];
-            serverCommand.attributes.forEach(function (attr) {
-                var clientAttribute = _this.clientDolphin.attribute(attr.propertyName, attr.qualifier, attr.value, attr.tag ? attr.tag : opendolphin.Tag.value());
-                clientAttribute.setBaseValue(attr.baseValue);
-                if (attr.id && attr.id.match(".*S$")) {
-                    clientAttribute.id = attr.id;
-                }
-                attributes.push(clientAttribute);
-            });
-            var clientPm = new opendolphin.ClientPresentationModel(serverCommand.pmId, serverCommand.pmType);
-            clientPm.addAttributes(attributes);
-            if (serverCommand.clientSideOnly) {
-                clientPm.clientSideOnly = true;
-            }
-            this.clientDolphin.getClientModelStore().add(clientPm);
-            this.clientDolphin.updatePresentationModelQualifier(clientPm);
-            clientPm.updateAttributeDirtyness();
-            clientPm.updateDirty();
-            return clientPm;
-        };
-        ClientConnector.prototype.handleValueChangedCommand = function (serverCommand) {
-            var clientAttribute = this.clientDolphin.getClientModelStore().findAttributeById(serverCommand.attributeId);
-            if (!clientAttribute) {
-                console.log("attribute with id " + serverCommand.attributeId + " not found, cannot update old value " + serverCommand.oldValue + " to new value " + serverCommand.newValue);
-                return null;
-            }
-            if (clientAttribute.getValue() == serverCommand.newValue) {
-                //console.log("nothing to do. new value == old value");
-                return null;
-            }
-
-            // Below was the code that would enforce that value changes only appear when the proper oldValue is given.
-            // While that seemed appropriate at first, there are actually valid command sequences where the oldValue is not properly set.
-            // We leave the commented code in the codebase to allow for logging/debugging such cases.
-            //            if(clientAttribute.getValue() != serverCommand.oldValue) {
-            //                console.log("attribute with id "+serverCommand.attributeId+" and value " + clientAttribute.getValue() +
-            //                            " was set to value " + serverCommand.newValue + " even though the change was based on an outdated old value of " + serverCommand.oldValue);
-            //            }
-            clientAttribute.setValue(serverCommand.newValue);
-            return null;
-        };
-        ClientConnector.prototype.handleBaseValueChangedCommand = function (serverCommand) {
-            var clientAttribute = this.clientDolphin.getClientModelStore().findAttributeById(serverCommand.attributeId);
-            if (!clientAttribute) {
-                console.log("attribute with id " + serverCommand.attributeId + " not found, cannot set base value.");
-                return null;
-            }
-            clientAttribute.rebase();
-            return null;
-        };
-        ClientConnector.prototype.handleSwitchPresentationModelCommand = function (serverCommand) {
-            var switchPm = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.pmId);
-            if (!switchPm) {
-                console.log("switch model with id " + serverCommand.pmId + " not found, cannot switch.");
-                return null;
-            }
-            var sourcePm = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.sourcePmId);
-            if (!sourcePm) {
-                console.log("source model with id " + serverCommand.sourcePmId + " not found, cannot switch.");
-                return null;
-            }
-            switchPm.syncWith(sourcePm);
-            return switchPm;
-        };
-        ClientConnector.prototype.handleInitializeAttributeCommand = function (serverCommand) {
-            var attribute = new opendolphin.ClientAttribute(serverCommand.propertyName, serverCommand.qualifier, serverCommand.newValue, serverCommand.tag);
-            if (serverCommand.qualifier) {
-                var attributesCopy = this.clientDolphin.getClientModelStore().findAllAttributesByQualifier(serverCommand.qualifier);
-                if (attributesCopy) {
-                    if (!serverCommand.newValue) {
-                        var attr = attributesCopy.shift();
-                        if (attr) {
-                            attribute.setValue(attr.getValue());
-                        }
-                    } else {
-                        attributesCopy.forEach(function (attr) {
-                            attr.setValue(attribute.getValue());
-                        });
-                    }
-                }
-            }
-            var presentationModel;
-            if (serverCommand.pmId) {
-                presentationModel = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.pmId);
-            }
-            if (!presentationModel) {
-                presentationModel = new opendolphin.ClientPresentationModel(serverCommand.pmId, serverCommand.pmType);
-                this.clientDolphin.getClientModelStore().add(presentationModel);
-            }
-            this.clientDolphin.addAttributeToModel(presentationModel, attribute);
-            this.clientDolphin.updatePresentationModelQualifier(presentationModel);
-            return presentationModel;
-        };
-        ClientConnector.prototype.handleSavedPresentationModelNotification = function (serverCommand) {
-            if (!serverCommand.pmId)
-                return null;
-            var model = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.pmId);
-            if (!model) {
-                console.log("model with id " + serverCommand.pmId + " not found, cannot rebase.");
-                return null;
-            }
-            model.rebase();
-            return model;
-        };
-        ClientConnector.prototype.handlePresentationModelResetedCommand = function (serverCommand) {
-            if (!serverCommand.pmId)
-                return null;
-            var model = this.clientDolphin.getClientModelStore().findPresentationModelById(serverCommand.pmId);
-            if (!model) {
-                console.log("model with id " + serverCommand.pmId + " not found, cannot reset.");
-                return null;
-            }
-            model.reset();
-            return model;
-        };
-        ClientConnector.prototype.handleAttributeMetadataChangedCommand = function (serverCommand) {
-            var clientAttribute = this.clientDolphin.getClientModelStore().findAttributeById(serverCommand.attributeId);
-            if (!clientAttribute)
-                return null;
-            clientAttribute[serverCommand.metadataName] = serverCommand.value;
-            return null;
-        };
-        ClientConnector.prototype.handleCallNamedActionCommand = function (serverCommand) {
-            this.clientDolphin.send(serverCommand.actionName, null);
-            return null;
-        };
-
-        ///////////// push support ///////////////
-        ClientConnector.prototype.listen = function () {
-            if (!this.pushEnabled)
-                return;
-            if (this.waiting)
-                return;
-
-            // todo: how to issue a warning if no pushListener is set?
-            this.waiting = true;
-            var me = this;
-            this.send(this.pushListener, { onFinished: function (models) {
-                    me.waiting = false;
-                    me.listen();
-                }, onFinishedData: null });
-        };
-
-        ClientConnector.prototype.release = function () {
-            if (!this.waiting)
-                return;
-            this.waiting = false;
-
-            // todo: how to issue a warning if no releaseCommand is set?
-            this.transmitter.signal(this.releaseCommand);
-        };
-        return ClientConnector;
+        return NoTransmitter;
     })();
-    opendolphin.ClientConnector = ClientConnector;
-})(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts" />
-var opendolphin;
-(function (opendolphin) {
-    var GetPresentationModelCommand = (function (_super) {
-        __extends(GetPresentationModelCommand, _super);
-        function GetPresentationModelCommand(pmId) {
-            _super.call(this);
-            this.pmId = pmId;
-            this.id = 'GetPresentationModel';
-            this.className = "org.opendolphin.core.comm.GetPresentationModelCommand";
-        }
-        return GetPresentationModelCommand;
-    })(opendolphin.Command);
-    opendolphin.GetPresentationModelCommand = GetPresentationModelCommand;
+    opendolphin.NoTransmitter = NoTransmitter;
 })(opendolphin || (opendolphin = {}));
 /// <reference path="Command.ts"/>
 /// <reference path="SignalCommand.ts"/>
@@ -1701,30 +1717,6 @@ var opendolphin;
     })();
     opendolphin.HttpTransmitter = HttpTransmitter;
 })(opendolphin || (opendolphin = {}));
-/// <reference path="Command.ts"/>
-/// <reference path="SignalCommand.ts"/>
-/// <reference path="ClientConnector.ts"/>
-var opendolphin;
-(function (opendolphin) {
-    /**
-    * A transmitter that is not transmitting at all.
-    * It may serve as a stand-in when no real transmitter is needed.
-    */
-    var NoTransmitter = (function () {
-        function NoTransmitter() {
-        }
-        NoTransmitter.prototype.transmit = function (commands, onDone) {
-            // do nothing special
-            onDone([]);
-        };
-
-        NoTransmitter.prototype.signal = function (command) {
-            // do nothing
-        };
-        return NoTransmitter;
-    })();
-    opendolphin.NoTransmitter = NoTransmitter;
-})(opendolphin || (opendolphin = {}));
 /// <reference path="ClientAttribute.ts"/>
 /// <reference path="ClientDolphin.ts"/>
 /// <reference path="ClientModelStore.ts"/>
@@ -1773,5 +1765,20 @@ var opendolphin;
         return ResetPresentationModelCommand;
     })(opendolphin.Command);
     opendolphin.ResetPresentationModelCommand = ResetPresentationModelCommand;
+})(opendolphin || (opendolphin = {}));
+/// <reference path="Command.ts" />
+var opendolphin;
+(function (opendolphin) {
+    var GetPresentationModelCommand = (function (_super) {
+        __extends(GetPresentationModelCommand, _super);
+        function GetPresentationModelCommand(pmId) {
+            _super.call(this);
+            this.pmId = pmId;
+            this.id = 'GetPresentationModel';
+            this.className = "org.opendolphin.core.comm.GetPresentationModelCommand";
+        }
+        return GetPresentationModelCommand;
+    })(opendolphin.Command);
+    opendolphin.GetPresentationModelCommand = GetPresentationModelCommand;
 })(opendolphin || (opendolphin = {}));
 //# sourceMappingURL=opendolphin.js.map
