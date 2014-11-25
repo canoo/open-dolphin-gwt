@@ -27,4 +27,18 @@ public class ClientModelStore extends JavaScriptObject {
 		} );
 	}-*/;
 
+	public final void addModelStoreListenerForType(final String presentationModelType, final ModelStoreChangeHandler handler) {
+
+		internal_addModelStoreListenerForType(presentationModelType, new ModelStoreChangeHandlerJS() {
+			public void handleChange(String changeType, ClientPresentationModel pm) {
+				handler.handleChange(ModelStoreChangeEventType.fromTypeValue(changeType), pm);
+			}
+		});
+	}
+	private native void internal_addModelStoreListenerForType(String presentationModelType, ModelStoreChangeHandlerJS handler) /*-{
+		this.onModelStoreChangeForType(presentationModelType, function (event)  {
+			handler.@com.canoo.opendolphin.client.js.ModelStoreChangeHandlerJS::handleChange(Ljava/lang/String;Lcom/canoo/opendolphin/client/gwt/ClientPresentationModel;)(event.eventType, event.clientPresentationModel);
+		} );
+	}-*/;
+
 }
