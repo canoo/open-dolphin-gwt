@@ -7,6 +7,9 @@ buildscript {
 		mavenCentral()
 		jcenter()
 	}
+	configurations {
+		opendolphinjs
+	}
 	dependencies {
 		classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.4'
 		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3'
@@ -24,13 +27,27 @@ apply plugin: 'bintray'
 
 repositories {
 	mavenCentral()
+	ivy {
+		name 'OpenDolphinJS'
+		url 'http://dl.bintray.com/opendolphin/resources/'
+		layout 'pattern', {
+			artifact '[module]-[revision](.[classifier]).[ext]'
+		}
+	}
 }
 
 dependencies {
 	compile ('com.google.gwt:gwt-servlet:2.6.0') {force = true} // explicit dependency just for IntelliJ since the IDE does not pick up the dependency from the gwt plugin
+	opendolphinjs group: 'opendolphin', name: 'opendolphin', version: '0.12.0B1', ext: 'js'
 }
 
-jar { 
+task fetchWebappArtifacts(type: Copy) {
+	from configurations.opendolphinjs
+	into "src/main/resources/com/canoo/opendolphin/public"
+	rename ('opendolphin-0.12.0B1.js', 'opendolphin.js')
+}
+
+jar {
     from sourceSets.main.allJava.matching { 
         include 'com/canoo/opendolphin/**/*.java' 
         include 'com/canoo/opendolphin/**/*.js' 
@@ -85,4 +102,8 @@ bintray() {
 
 task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
 	logger.info "Installing $project.name"
+}
+
+project.afterEvaluate {
+	processResources.dependsOn fetchWebappArtifacts
 }
