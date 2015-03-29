@@ -1,0 +1,3 @@
+= GWT OpenDolphin client
+
+This is the GWT interface to the OpenDolphinJS client library
