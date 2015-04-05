@@ -17,7 +17,7 @@ buildscript {
 }
 
 group = 'org.open-dolphin'
-version = '0.12.0'
+version = '0.12.1'
 
 apply plugin: 'gwt'
 apply plugin: 'maven-publish'
@@ -37,18 +37,20 @@ repositories {
 }
 
 ext {
-	opendolphin_js_version = '0.12.0B1'
+	opendolphin_js_version = '0.12.0B2'
 }
 
 dependencies {
 	compile ('com.google.gwt:gwt-servlet:2.6.0') {force = true} // explicit dependency just for IntelliJ since the IDE does not pick up the dependency from the gwt plugin
 	opendolphinjs group: 'opendolphin', name: 'opendolphin', version: opendolphin_js_version, ext: 'js'
+	opendolphinjs group: 'opendolphin', name: 'opendolphin', version: opendolphin_js_version, ext: 'js.map'
 }
 
 task fetchWebappArtifacts(type: Copy) {
 	from configurations.opendolphinjs
 	into "src/main/resources/com/canoo/opendolphin/public"
 	rename ("opendolphin-${opendolphin_js_version}.js", 'opendolphin.js')
+	rename ("opendolphin-${opendolphin_js_version}.js.map", 'opendolphin.js.map')
 }
 
 jar {
