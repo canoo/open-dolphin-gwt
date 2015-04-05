@@ -67,7 +67,8 @@ public class ClientDolphin extends JavaScriptObject {
 		return this.presentationModelWithType(id, type, clientAttributes.toArray(new ClientAttribute[clientAttributes.size()]));
     }
 	private native ClientPresentationModel presentationModel(String pmId, String type, JsArray<ClientAttribute> clientAttributes) /*-{
-		return this.presentationModel(pmId, type, clientAttributes);
+		// Note: using '.apply(...)' is necessary so that API of opendolphinJS's 'ClientDolphin.presentationModel()' is receiving varargs parameter correctly
+		return this.presentationModel.apply(this, [pmId, type].concat(clientAttributes));
 	}-*/;
 	public final ClientPresentationModel presentationModelWithType(String id, String type, ClientAttribute... clientAttributes) {
 		JsArray jsAttributes = ClientAttribute.createArray().cast();
