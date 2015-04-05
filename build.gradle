@@ -37,7 +37,7 @@ repositories {
 }
 
 ext {
-	opendolphin_js_version = '0.12.0B2'
+	opendolphin_js_version = '0.12.0B3'
 }
 
 dependencies {
