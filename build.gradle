@@ -27,30 +27,29 @@ apply plugin: 'bintray'
 
 repositories {
 	mavenCentral()
-	ivy {
-		name 'OpenDolphinJS'
-		url 'http://dl.bintray.com/opendolphin/resources/'
-		layout 'pattern', {
-			artifact '[module]-[revision](.[classifier]).[ext]'
-		}
-	}
+	maven { url 'http://dl.bintray.com/opendolphin/mavenrepo' }
 }
 
 ext {
-	opendolphin_js_version = '0.12.0B3'
+	opendolphin_js_version = '0.12.0B2'
 }
 
+configurations {
+	buildtime
+}
 dependencies {
 	compile ('com.google.gwt:gwt-servlet:2.6.0') {force = true} // explicit dependency just for IntelliJ since the IDE does not pick up the dependency from the gwt plugin
-	opendolphinjs group: 'opendolphin', name: 'opendolphin', version: opendolphin_js_version, ext: 'js'
-	opendolphinjs group: 'opendolphin', name: 'opendolphin', version: opendolphin_js_version, ext: 'js.map'
+
+	buildtime "org.open-dolphin:client-javascript:${opendolphin_js_version}"
 }
 
 task fetchWebappArtifacts(type: Copy) {
-	from configurations.opendolphinjs
+	from(zipTree(artifactJar("client-javascript-${opendolphin_js_version}")).files)
+	include 'opendolphin.js*'
 	into "src/main/resources/com/canoo/opendolphin/public"
-	rename ("opendolphin-${opendolphin_js_version}.js", 'opendolphin.js')
-	rename ("opendolphin-${opendolphin_js_version}.js.map", 'opendolphin.js.map')
+}
+private artifactJar(String namePart) {
+	configurations.buildtime.find { it.name.contains(namePart) }?.absolutePath
 }
 
 jar {
