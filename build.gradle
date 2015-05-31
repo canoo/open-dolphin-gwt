@@ -26,12 +26,13 @@ apply plugin: 'bintray'
 //def gwtBuildDir = 'war'
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 	maven { url 'http://dl.bintray.com/opendolphin/mavenrepo' }
 }
 
 ext {
-	opendolphin_js_version = '1.0-RC1'
+	opendolphin_js_version = '1.0-RC2-SNAPSHOT'
 }
 
 configurations {

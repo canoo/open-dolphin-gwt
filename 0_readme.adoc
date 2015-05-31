@@ -1,4 +1,4 @@
-install into local maven repository: gradlew publishToMavenLocal
+install into local maven repository: ./gradlew publishToMavenLocal
 
 make release:
 * remove SNAPSHOT from version in +build.gradle+. E.g.: +0.10.4-SNAPSHOT+ -> +0.10.4+

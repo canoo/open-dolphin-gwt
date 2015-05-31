@@ -6,4 +6,7 @@ public class OpenDolphin {
 		return $wnd.opendolphin.dolphin(dolphinURL, reset, slackInMillis);
 	}-*/;
 
+	public final static DolphinBuilder makeDolphin() {
+		return new DolphinBuilder();
+	}
 }
