@@ -32,7 +32,7 @@ repositories {
 }
 
 ext {
-	opendolphin_js_version = '1.0-RC2-SNAPSHOT'
+	opendolphin_js_version = '1.0-RC2B1'
 }
 
 configurations {
