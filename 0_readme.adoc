@@ -1,9 +1,9 @@
 install into local maven repository: ./gradlew publishToMavenLocal
 
 make release:
-* remove SNAPSHOT from version in +build.gradle+. E.g.: +0.10.4-SNAPSHOT+ -> +0.10.4+
+* remove SNAPSHOT from version in +build.gradle+. E.g.: +1.0-RC2B3-SNAPSHOT+ -> +1.0-RC2B3+
 * ./gradlew clean build bintrayUpload
-* tag git repo: git tag -a "0.10.4" -m "version 0.10.4"
+* tag git repo: git tag -a "1.0-RC2B3" -m "version 1.0-RC2B3"
 * git push
 * git push --tags
-* increase version in +build.gradle+ and add SNAPSHOT . E.g.: +0.10.4+ -> +0.10.5-SNAPSHOT+
+* increase version in +build.gradle+ and add SNAPSHOT . E.g.: +1.0-RC2B3+ -> +1.0-RC2B3+

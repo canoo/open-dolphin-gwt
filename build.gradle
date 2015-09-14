@@ -17,7 +17,7 @@ buildscript {
 }
 
 group = 'org.open-dolphin'
-version = '1.0-RC2B1'
+version = '1.0-RC2B3'
 
 apply plugin: 'gwt'
 apply plugin: 'maven-publish'
@@ -32,7 +32,7 @@ repositories {
 }
 
 ext {
-	opendolphin_js_version = '1.0-RC2B1'
+	opendolphin_js_version = '1.0-RC2B3'
 }
 
 configurations {
